@@ -5,12 +5,63 @@ export class ApplicationException extends Error {
     this.statusCode = statusCode;
   }
 }
-export interface IError extends Error {
-  statusCode: number;
-}
 
 export class validationError extends ApplicationException {
   constructor(msg: string[], statusCode: number, options?: ErrorOptions) {
     super(msg.join("\n"), statusCode, options);
+  }
+}
+
+export class userExistError extends ApplicationException {
+  constructor() {
+    super("User already exists", 400);
+  }
+}
+
+export class failedToCreateUser extends ApplicationException {
+  constructor() {
+    super("Failed to create user", 500);
+  }
+}
+
+export class notFoundError extends ApplicationException {
+  constructor() {
+    super("Page Not Found", 404);
+  }
+}
+
+export class userNotFoundError extends ApplicationException {
+  constructor() {
+    super("User Not Found", 404);
+  }
+}
+
+export class userAlreadyConfirmedError extends ApplicationException {
+  constructor() {
+    super("User Already Confirmed", 400);
+  }
+}
+
+export class otpExpiredError extends ApplicationException {
+  constructor() {
+    super("OTP Expired", 400);
+  }
+}
+
+export class invalidCredentialsError extends ApplicationException {
+  constructor() {
+    super("Invalid Credentials", 400);
+  }
+}
+
+export class otpNotExpiredError extends ApplicationException {
+  constructor() {
+    super("OTP Not Expired yet", 400);
+  }
+}
+
+export class userNotConfirmedError extends ApplicationException {
+  constructor() {
+    super("User Not Confirmed", 400);
   }
 }

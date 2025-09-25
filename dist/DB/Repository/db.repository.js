@@ -1,16 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DBRepository = void 0;
 class DBRepository {
     model;
     constructor(model) {
         this.model = model;
     }
-    async findOne({ data, projection, option }) {
-        return this.model.findOne(data, projection, option);
+    async findOne({ filter, projection, options, }) {
+        const doc = this.model.findOne(filter, projection, options);
+        if (options?.lean) {
+            doc.lean();
+        }
+        return doc;
     }
-    async createOne({ data, option }) {
-        return this.model.create([data], option);
+    create = async ({ data, options, }) => {
+        return this.model.create(data, options);
+    };
+    async findById({ id, projection, options, }) {
+        const doc = this.model.findById(id, projection, options);
+        if (options?.lean) {
+            doc.lean();
+        }
+        return doc;
     }
 }
-exports.DBRepository = DBRepository;
+exports.default = DBRepository;

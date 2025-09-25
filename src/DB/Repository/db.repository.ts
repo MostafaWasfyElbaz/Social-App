@@ -1,13 +1,54 @@
-import { CreateOptions, Model, ProjectionType, QueryOptions } from "mongoose";
+import {
+  CreateOptions,
+  FilterQuery,
+  FlattenMaps,
+  HydratedDocument,
+  Model,
+  ProjectionType,
+  QueryOptions,
+  Types,
+} from "mongoose";
 
-export abstract class DBRepository<T> {
+export default abstract class DBRepository<T> {
+  constructor(protected readonly model: Model<T>) {}
+  async findOne({
+    filter,
+    projection,
+    options,
+  }: {
+    filter: FilterQuery<T>;
+    projection?: ProjectionType<T>;
+    options?: QueryOptions<T>;
+  }): Promise<FlattenMaps<HydratedDocument<T>> | HydratedDocument<T> | null> {
+    const doc = this.model.findOne(filter, projection, options);
+    if (options?.lean) {
+      doc.lean();
+    }
+    return doc;
+  }
+  create = async ({
+    data,
+    options,
+  }: {
+    data: Partial<HydratedDocument<T>>[];
+    options?: CreateOptions;
+  }): Promise<T[]> => {
+    return this.model.create(data, options);
+  };
 
-    constructor(protected readonly model: Model<T>) {}
-    async findOne({data,projection,option}:{data:Partial<T>,projection?:ProjectionType<T>,option?:QueryOptions<T>}):Promise<T | null>{
-        return this.model.findOne(data,projection,option)
+  async findById({
+    id,
+    projection,
+    options,
+  }: {
+    id: Types.ObjectId | string;
+    projection?: ProjectionType<T>;
+    options?: QueryOptions<T>;
+  }): Promise<FlattenMaps<HydratedDocument<T>> | HydratedDocument<T> | null> {
+    const doc = this.model.findById(id, projection, options);
+    if (options?.lean) {
+      doc.lean();
     }
-    async createOne({data,option}:{data:Partial<T>,option?:CreateOptions}):Promise<T[]>{
-        return this.model.create([data],option)
-    }
-    
+    return doc;
+  }
 }

@@ -23,14 +23,14 @@ const bootstrap = async () => {
         });
     });
     app.use((err, req, res, next) => {
-        return res.status(err.statusCode).json({
+        return res.status(err.statusCode || 500).json({
             message: err.message,
-            status: err.statusCode,
+            status: err.statusCode || 500,
             stack: err.stack,
         });
     });
-    app.listen(process.env.PORT, () => {
-        console.log(`Server is running on port ${process.env.PORT}`);
+    app.listen(process.env.SERVER_PORT, () => {
+        console.log(`Server is running on port ${process.env.SERVER_PORT}`);
     });
 };
 exports.bootstrap = bootstrap;
