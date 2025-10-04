@@ -1,6 +1,6 @@
 import { HydratedDocument, Schema, model } from "mongoose";
-import { IUser, Gender } from "../../common/index";
-import { createHash } from "../../utils";
+import { IUser, Gender,Events } from "../../common/index";
+import { createHash, emailEmitter,generateOTP,template} from "../../utils";
 
 const usersSchema = new Schema<IUser>({
   firstName: {
@@ -51,22 +51,41 @@ const usersSchema = new Schema<IUser>({
   ],
 });
 
-usersSchema.pre("save", async function (this:HydratedDocument<IUser>&{wasNew:boolean},next) {
-  this.wasNew = this.isNew
-  if (this.isModified("password")) {
-    this.password = await createHash(this.password);
-  }
-  if (this.isModified("emailOtp")) {
-    if (this.emailOtp) {
-      this.emailOtp.otp = await createHash(this.emailOtp.otp);
+usersSchema.pre(
+  "save",
+  async function (this: HydratedDocument<IUser> & { wasNew: boolean }, next) {
+    this.wasNew = this.isNew;
+    if (this.isModified("password")) {
+      this.password = await createHash(this.password);
+    }
+    if (this.isModified("passwordOtp")) {
+      if (this.passwordOtp) {
+        this.passwordOtp.otp = await createHash(this.passwordOtp.otp);
+      }
     }
   }
-  if (this.isModified("passwordOtp")) {
-    if (this.passwordOtp) {
-      this.passwordOtp.otp = await createHash(this.passwordOtp.otp);
+);
+
+usersSchema.post(
+  "save",
+  async function (doc, next) {
+    const that = this as HydratedDocument<IUser> & { wasNew: boolean };
+    if (that.wasNew) {
+      const otp = generateOTP();
+      emailEmitter.publish(Events.confirmEmail, {
+        to: that.email,
+        subject: "Confirm Email",
+        html: template(otp, `${that.firstName} ${that.lastName}`, "Confirm Email"),
+      });
+      that.emailOtp = {
+        otp: await createHash(otp),
+        expiresAt: new Date(Date.now() + Number(process.env.OTP_EXPIRATION)),
+      };
+      await that.save();
     }
+    console.log(this.isModified("password"));
   }
-});
+);
 
 export const User = model<IUser>("User", usersSchema);
 

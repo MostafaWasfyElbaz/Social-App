@@ -38,7 +38,6 @@ class AuthServices implements IAuthServices {
     try {
       const { firstName, lastName, email, password, gender, phone }: signupDTO =
         req.body;
-      const confirmEmailOtp = generateOTP();
       const user = await this.userRepo.createUser({
         firstName,
         lastName,
@@ -46,25 +45,10 @@ class AuthServices implements IAuthServices {
         password,
         gender: gender || Gender.male,
         phone,
-        emailOtp: {
-          otp: confirmEmailOtp,
-          expiresAt: new Date(Date.now() + Number(process.env.OTP_EXPIRATION)),
-        },
       });
       if (!user) {
         throw new failedToCreateUser();
       }
-      const subject: string = "Confirm Email";
-      const html: string = template(
-        confirmEmailOtp,
-        `${firstName} ${lastName}`,
-        subject
-      );
-      emailEmitter.publish(Events.confirmEmail, {
-        to: email,
-        subject,
-        html,
-      });
       return successHandler({
         res,
         msg: "User created successfully",

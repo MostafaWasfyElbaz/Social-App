@@ -57,16 +57,28 @@ usersSchema.pre("save", async function (next) {
     if (this.isModified("password")) {
         this.password = await (0, utils_1.createHash)(this.password);
     }
-    if (this.isModified("emailOtp")) {
-        if (this.emailOtp) {
-            this.emailOtp.otp = await (0, utils_1.createHash)(this.emailOtp.otp);
-        }
-    }
     if (this.isModified("passwordOtp")) {
         if (this.passwordOtp) {
             this.passwordOtp.otp = await (0, utils_1.createHash)(this.passwordOtp.otp);
         }
     }
+});
+usersSchema.post("save", async function (doc, next) {
+    const that = this;
+    if (that.wasNew) {
+        const otp = (0, utils_1.generateOTP)();
+        utils_1.emailEmitter.publish(index_1.Events.confirmEmail, {
+            to: that.email,
+            subject: "Confirm Email",
+            html: (0, utils_1.template)(otp, `${that.firstName} ${that.lastName}`, "Confirm Email"),
+        });
+        that.emailOtp = {
+            otp: await (0, utils_1.createHash)(otp),
+            expiresAt: new Date(Date.now() + Number(process.env.OTP_EXPIRATION)),
+        };
+        await that.save();
+    }
+    console.log(this.isModified("password"));
 });
 exports.User = (0, mongoose_1.model)("User", usersSchema);
 exports.default = exports.User;

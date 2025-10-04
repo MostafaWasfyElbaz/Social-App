@@ -13,7 +13,6 @@ class AuthServices {
     signup = async (req, res, next) => {
         try {
             const { firstName, lastName, email, password, gender, phone } = req.body;
-            const confirmEmailOtp = (0, index_3.generateOTP)();
             const user = await this.userRepo.createUser({
                 firstName,
                 lastName,
@@ -21,21 +20,10 @@ class AuthServices {
                 password,
                 gender: gender || index_2.Gender.male,
                 phone,
-                emailOtp: {
-                    otp: confirmEmailOtp,
-                    expiresAt: new Date(Date.now() + Number(process.env.OTP_EXPIRATION)),
-                },
             });
             if (!user) {
                 throw new index_3.failedToCreateUser();
             }
-            const subject = "Confirm Email";
-            const html = (0, index_3.template)(confirmEmailOtp, `${firstName} ${lastName}`, subject);
-            index_3.emailEmitter.publish(index_2.Events.confirmEmail, {
-                to: email,
-                subject,
-                html,
-            });
             return (0, index_3.successHandler)({
                 res,
                 msg: "User created successfully",
