@@ -32,7 +32,7 @@ export class S3Services implements IS3Services {
     const command = new PutObjectCommand({
       Bucket,
       ACL,
-      Key: `${process.env.APP_NAME}/${Path}/${nanoid(15)}_${file.originalname}`,
+      Key: `${process.env.APP_NAME}/users/${Path}/${nanoid(15)}_${file.originalname}`,
       Body:
         storeIn == StoreIn.memory ? file.buffer : createReadStream(file.path),
       ContentType: file.mimetype,
@@ -63,7 +63,7 @@ export class S3Services implements IS3Services {
       params: {
         Bucket,
         ACL,
-        Key: `${process.env.APP_NAME}/${Path}/${nanoid(15)}_${
+        Key: `${process.env.APP_NAME}/users/${Path}/${nanoid(15)}_${
           file.originalname
         }`,
         Body:

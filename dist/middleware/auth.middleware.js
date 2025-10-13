@@ -17,11 +17,22 @@ const decodeToken = async ({ authorization, tokenType = index_2.TokenType.access
         if (!token) {
             throw new index_1.invalidCredentialsError();
         }
+        let secret;
+        if (tokenType == index_2.TokenType.access) {
+            secret = process.env.ACCESS_SIGNITURE;
+        }
+        else if (tokenType == index_2.TokenType.refresh) {
+            secret = process.env.REFRESH_SIGNITURE;
+        }
+        else if (tokenType == index_2.TokenType.temp) {
+            secret = process.env.TEMP_SIGNITURE;
+        }
+        else {
+            throw new index_1.invalidCredentialsError();
+        }
         const decodedToken = (0, index_1.verifyToken)({
             token,
-            secret: tokenType == index_2.TokenType.access
-                ? process.env.ACCESS_SIGNITURE
-                : process.env.REFRESH_SIGNITURE,
+            secret
         });
         if (!decodedToken) {
             throw new index_1.invalidCredentialsError();
@@ -33,7 +44,8 @@ const decodeToken = async ({ authorization, tokenType = index_2.TokenType.access
         if (!user.isConfirmed) {
             throw new index_1.userNotConfirmedError();
         }
-        if (user.changedCredentialsAt && user.changedCredentialsAt.getTime() >= decodedToken.iat * 1000) {
+        if (user.changedCredentialsAt &&
+            user.changedCredentialsAt.getTime() >= decodedToken.iat * 1000) {
             throw new index_1.invalidCredentialsError();
         }
         return { user, decodedToken };
@@ -43,10 +55,13 @@ const decodeToken = async ({ authorization, tokenType = index_2.TokenType.access
     }
 };
 exports.decodeToken = decodeToken;
-const auth = () => {
+const auth = ({ tokenType = index_2.TokenType.access, } = {}) => {
     return async (req, res, next) => {
         try {
-            const { user } = await (0, exports.decodeToken)({ authorization: req.headers.authorization });
+            const { user } = await (0, exports.decodeToken)({
+                authorization: req.headers.authorization,
+                tokenType,
+            });
             res.locals.user = user;
             next();
         }

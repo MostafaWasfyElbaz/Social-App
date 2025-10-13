@@ -4,9 +4,9 @@ import {
   notFoundError,
   userNotConfirmedError,
 } from "../utils/index";
-import { IUser, TokenType,IPayload } from "../common/index";
+import { IUser, TokenType, IPayload } from "../common/index";
 import { UserRepository } from "../DB/index";
-import { Request, Response,NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { HydratedDocument } from "mongoose";
 
 const userModel = new UserRepository();
@@ -17,7 +17,7 @@ export const decodeToken = async ({
 }: {
   authorization: string;
   tokenType?: TokenType;
-}): Promise<{user:HydratedDocument<IUser>,decodedToken:IPayload}> => {
+}): Promise<{ user: HydratedDocument<IUser>; decodedToken: IPayload }> => {
   try {
     if (!authorization) {
       throw new invalidCredentialsError();
@@ -29,12 +29,19 @@ export const decodeToken = async ({
     if (!token) {
       throw new invalidCredentialsError();
     }
+    let secret;
+    if(tokenType == TokenType.access){
+      secret = process.env.ACCESS_SIGNITURE as string;
+    }else if(tokenType == TokenType.refresh){
+      secret = process.env.REFRESH_SIGNITURE as string;
+    }else if(tokenType == TokenType.temp){
+      secret = process.env.TEMP_SIGNITURE as string;
+    }else{
+      throw new invalidCredentialsError();
+    }
     const decodedToken = verifyToken({
       token,
-      secret:
-        tokenType == TokenType.access
-          ? (process.env.ACCESS_SIGNITURE as string)
-          : (process.env.REFRESH_SIGNITURE as string),
+      secret
     });
     if (!decodedToken) {
       throw new invalidCredentialsError();
@@ -43,26 +50,38 @@ export const decodeToken = async ({
     if (!user) {
       throw new notFoundError();
     }
-    if(!user.isConfirmed){
+    if (!user.isConfirmed) {
       throw new userNotConfirmedError();
     }
-    if(user.changedCredentialsAt && user.changedCredentialsAt.getTime() >= decodedToken.iat * 1000){
+    if (
+      user.changedCredentialsAt &&
+      user.changedCredentialsAt.getTime() >= decodedToken.iat * 1000
+    ) {
       throw new invalidCredentialsError();
     }
-    return {user,decodedToken};
+    return { user, decodedToken };
   } catch (error) {
     throw error;
   }
 };
 
-export const auth = () => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const auth = ({
+  tokenType = TokenType.access,
+}: { tokenType?: TokenType } = {}) => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
     try {
-      const {user}: {user:HydratedDocument<IUser>} = await decodeToken({ authorization: req.headers.authorization as string});
+      const { user }: { user: HydratedDocument<IUser> } = await decodeToken({
+        authorization: req.headers.authorization as string,
+        tokenType,
+      });
       res.locals.user = user;
       next();
     } catch (error) {
-        next(error)
+      next(error);
     }
   };
 };

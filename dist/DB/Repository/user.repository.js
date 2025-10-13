@@ -5,22 +5,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const db_repository_1 = __importDefault(require("../Repository/db.repository"));
 const index_1 = require("../index");
-const index_2 = require("../../utils/index");
+const utils_1 = require("../../utils");
 class UserRepository extends db_repository_1.default {
     model;
     constructor(model = index_1.User) {
         super(model);
         this.model = model;
     }
-    async findUserByEmail(email) {
+    findUserByEmail = async (email) => {
         return this.model.findOne({ email });
-    }
-    async createUser(user) {
+    };
+    createUser = async (user) => {
         const isExist = await this.findUserByEmail(user.email);
         if (isExist) {
-            throw new index_2.userExistError();
+            throw new utils_1.userExistError();
         }
         return this.model.create(user);
-    }
+    };
 }
 exports.default = UserRepository;

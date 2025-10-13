@@ -5,30 +5,30 @@ export interface IUserServices {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void>;
+  ): Promise<Response>;
   uploadProfilePicture(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void>;
+  ): Promise<Response>;
   uploadFileWithPreSignedUrl(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void>;
+  ): Promise<Response>;
   getFilesOrDownload(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void>;
+  ): Promise<Response>;
   deleteProfileImage(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void>;
+  ): Promise<Response>;
   deleteCoverImages(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void>;
+  ): Promise<Response>;
 }

@@ -17,7 +17,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserRepository = void 0;
+exports.PostRepository = exports.UserRepository = void 0;
 __exportStar(require("./models/user.model"), exports);
+__exportStar(require("./models/post.model"), exports);
 var user_repository_1 = require("./Repository/user.repository");
 Object.defineProperty(exports, "UserRepository", { enumerable: true, get: function () { return __importDefault(user_repository_1).default; } });
+var post_repository_1 = require("./Repository/post.repository");
+Object.defineProperty(exports, "PostRepository", { enumerable: true, get: function () { return __importDefault(post_repository_1).default; } });

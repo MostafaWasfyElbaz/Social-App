@@ -8,4 +8,10 @@ export * from "./enums/Gender";
 export * from "./enums/TokenType";
 export * from "./enums/StoreIn";
 export * from "./enums/Events";
-export * from "./types/OtpType";
+export * from "./enums/PostAvailability";
+export * from "./interfaces/IPost";
+export * from "./interfaces/IPostServices";
+export * from "./interfaces/IPostRepo";
+export * from "./interfaces/IUserRepo";
+export * from "./interfaces/IOtp";
+

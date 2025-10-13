@@ -24,6 +24,7 @@ export const signupSchema = z
         "Phone number must be at least 11 characters long"
       ),
     gender: z.enum(Gender).optional(),
+    _2FA: z.boolean().optional().default(false),
   })
   .superRefine((arg, ctx) => {
     if (arg.password !== arg.confirmPassword) {
@@ -57,4 +58,17 @@ export const resetPasswordSchema = z.object({
   email: z.email("Invalid email"),
   otp: z.string().min(6, "OTP must be at least 6 characters long"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
+});
+
+export const updateEmailSchema = z.object({
+  email: z.email("Invalid email"),
+});
+
+export const confirmEmailChangeSchema = z.object({
+  oldOtp: z.string().min(6, "OTP must be at least 6 characters long"),
+  newOtp: z.string().min(6, "OTP must be at least 6 characters long"),
+});
+
+export const _2FASchema = z.object({
+  otp: z.string().min(6, "OTP must be at least 6 characters long"),
 });

@@ -5,4 +5,5 @@ var Events;
 (function (Events) {
     Events["confirmEmail"] = "confirmEmail";
     Events["resetPassword"] = "resetPassword";
+    Events["general"] = "general";
 })(Events || (exports.Events = Events = {}));

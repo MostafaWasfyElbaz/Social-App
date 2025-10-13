@@ -1,24 +1,29 @@
 import DBRepository from "../Repository/db.repository";
 import { User } from "../index";
-import { IUser } from "../../common/index";
+import { IUser, IUserRepo } from "../../common";
 import { HydratedDocument, Model } from "mongoose";
-import { userExistError } from "../../utils/index";
+import { userExistError } from "../../utils";
 
-export default class UserRepository extends DBRepository<IUser> {
+export default class UserRepository
+  extends DBRepository<IUser>
+  implements IUserRepo
+{
   constructor(protected override readonly model: Model<IUser> = User) {
     super(model);
   }
-  async findUserByEmail(
+  findUserByEmail = async (
     email: string
-  ): Promise<HydratedDocument<IUser> | null> {
+  ): Promise<HydratedDocument<IUser> | null> => {
     return this.model.findOne({ email });
-  }
+  };
 
-  async createUser(user: Partial<IUser>): Promise<HydratedDocument<IUser>> {
+  createUser = async (
+    user: Partial<IUser>
+  ): Promise<HydratedDocument<IUser>> => {
     const isExist = await this.findUserByEmail(user.email as string);
     if (isExist) {
       throw new userExistError();
     }
     return this.model.create(user);
-  }
+  };
 }

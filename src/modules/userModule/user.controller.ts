@@ -6,14 +6,25 @@ import { auth } from "../../middleware/index";
 const router = Router();
 
 const userServices = new UserServices();
+const routes = {
+    uploadProfilePicture: "/upload-profile-picture",
+    uploadCoverImages: "/upload-cover-images",
+    uploadFileWithPresignedUrl: "/upload-file-with-presigned-url",
+    getFilesOrDownload: "/uploads/*path",
+    getFilesOrDownloadPreSignedUrl: "/pre-signed-url/uploads/*path",
+    deleteProfileImage: "/uploads/delete-profile-image/*path",
+    deleteCoverImages: "/uploads/delete-cover-images/*path",
+    updateUserBasicInfo: "/update-user-basic-info",
+}
 
-router.patch("/upload-profile-picture",auth(),uploadFile({}).single("profilePicture"), userServices.uploadProfilePicture);
-router.patch("/upload-cover-images",auth(),uploadFile({}).array("coverImages",5), userServices.uploadCoverImages);
-router.patch("/upload-file-with-presigned-url",auth(), userServices.uploadFileWithPreSignedUrl);
+router.patch(routes.uploadProfilePicture,auth(),uploadFile({}).single("profilePicture"), userServices.uploadProfilePicture);
+router.patch(routes.uploadCoverImages,auth(),uploadFile({}).array("coverImages",5), userServices.uploadCoverImages);
+router.patch(routes.uploadFileWithPresignedUrl,auth(), userServices.uploadFileWithPreSignedUrl);
+router.patch(routes.updateUserBasicInfo,auth(), userServices.updateUserBasicInfo);
 
-router.get("/uploads/*path", userServices.getFilesOrDownload);
-router.get("/pre-signed-url/uploads/*path", userServices.getFilesOrDownloadPreSignedUrl);
+router.get(routes.getFilesOrDownload, userServices.getFilesOrDownload);
+router.get(routes.getFilesOrDownloadPreSignedUrl, userServices.getFilesOrDownloadPreSignedUrl);
 
-router.delete("/uploads/delete-profile-image/*path", auth(),userServices.deleteProfileImage);
-router.delete("/uploads/delete-cover-umages/*path", auth(),userServices.deleteCoverImages);
+router.delete(routes.deleteProfileImage, auth(),userServices.deleteProfileImage);
+router.delete(routes.deleteCoverImages, auth(),userServices.deleteCoverImages);
 export default router;

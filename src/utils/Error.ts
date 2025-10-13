@@ -13,79 +13,105 @@ export class validationError extends ApplicationException {
 }
 
 export class userExistError extends ApplicationException {
-  constructor() {
-    super("User already exists", 400);
+  constructor(msg:string = "User already exists", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class failedToCreateUser extends ApplicationException {
-  constructor() {
-    super("Failed to create user", 500);
+  constructor(msg:string = "Failed to create user", statusCode: number = 500) {
+    super(msg, statusCode);
   }
 }
 
 export class notFoundError extends ApplicationException {
-  constructor() {
-    super("Not Found", 404);
+  constructor(msg:string = "Not Found", statusCode: number = 404) {
+    super(msg, statusCode);
   }
 }
 
 export class failedToGenerateLink extends ApplicationException {
-    constructor() {
-        super("Failed to generate link", 500);
+    constructor(msg:string = "Failed to generate link", statusCode: number = 500) {
+        super(msg, statusCode);
     }
 }
 
 export class userAlreadyConfirmedError extends ApplicationException {
-  constructor() {
-    super("User Already Confirmed", 400);
+  constructor(msg:string = "User Already Confirmed", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class otpExpiredError extends ApplicationException {
-  constructor() {
-    super("OTP Expired", 400);
+  constructor(msg:string = "OTP Expired", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class invalidCredentialsError extends ApplicationException {
-  constructor() {
-    super("Invalid Credentials", 400);
+  constructor(msg:string = "Invalid Credentials", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class otpNotExpiredError extends ApplicationException {
-  constructor() {
-    super("OTP Not Expired yet", 400);
+  constructor(msg:string = "OTP Not Expired yet", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class userNotConfirmedError extends ApplicationException {
-  constructor() {
-    super("User Not Confirmed", 400);
+  constructor(msg:string = "User Not Confirmed", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class invalidFileTypeError extends ApplicationException {
-  constructor() {
-    super("Invalid File Type", 400);
+  constructor(msg:string = "Invalid File Type", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class fileSizeError extends ApplicationException {
-  constructor() {
-    super("File Size Exceeded", 400);
+  constructor(msg:string = "File Size Exceeded", statusCode: number = 400) {
+    super(msg, statusCode);
   }
 }
 
 export class failedToUpload extends ApplicationException {
-    constructor() {
-        super("Upload Failed", 500);
+    constructor(msg:string = "Upload Failed", statusCode: number = 500) {
+        super(msg, statusCode);
     }
 }
 
 export class unauthorizedError extends ApplicationException {
-    constructor() {
-        super("Unauthorized", 401);
+    constructor(msg:string = "Unauthorized", statusCode: number = 401) {
+        super(msg, statusCode);
     }
 }
+
+export class invalidTagsError extends ApplicationException {
+    constructor(invalidTags: string[] ,msg:string = `Invalid Tags [${invalidTags}]`,statusCode: number = 400) {
+        super(msg, statusCode);
+    }
+}
+
+export class faildToCreatePost extends ApplicationException {
+    constructor(msg:string = "Failed to create post", statusCode: number = 500) {
+        super(msg, statusCode);
+    }
+}
+
+export class tryResendOtp extends ApplicationException {
+    constructor(msg:string = "Please try to resend otp", statusCode: number = 400) {
+        super(msg, statusCode);
+    }
+}
+
+export class tooManyRequestsError extends ApplicationException {
+    constructor(msg:string = "Too many requests", statusCode: number = 429) {
+        super(msg, statusCode);
+    }
+}
+
+

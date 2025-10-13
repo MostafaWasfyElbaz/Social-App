@@ -8,6 +8,8 @@ export const validationMiddleware = (schema: z.ZodSchema) => {
       ...req.body,
       ...req.query,
       ...req.params,
+      ...req.file,
+      files: req.files,
     };
     const result = schema.safeParse(data);
     if (!result.success) {

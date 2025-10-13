@@ -2,8 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = require("mongoose");
-const index_1 = require("../../common/index");
+const common_1 = require("../../common");
 const utils_1 = require("../../utils");
+const otpSchema = new mongoose_1.Schema({
+    otp: { type: String },
+    expiresAt: { type: Date },
+    attempts: { count: { type: Number, default: 0 }, banExp: { type: Date } },
+    request: { count: { type: Number, default: 0 }, banExp: { type: Date } },
+});
 const usersSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
@@ -15,26 +21,29 @@ const usersSchema = new mongoose_1.Schema({
     },
     gender: {
         type: String,
-        enum: index_1.Gender,
-        default: index_1.Gender.male,
+        enum: common_1.Gender,
+        default: common_1.Gender.male,
     },
     email: {
         type: String,
         required: [true, "Email is required"],
         unique: true,
     },
+    tempEmail: {
+        type: String,
+        unique: true,
+    },
     password: {
         type: String,
         required: [true, "Password is required"],
     },
-    emailOtp: {
-        otp: { type: String },
-        expiresAt: { type: Date },
+    _2FA: {
+        type: Boolean,
+        default: false,
     },
-    passwordOtp: {
-        otp: { type: String },
-        expiresAt: { type: Date },
-    },
+    emailOtp: otpSchema,
+    passwordOtp: otpSchema,
+    tempEmailOtp: otpSchema,
     phone: {
         type: String,
         unique: [true, "Phone number already exists"],
@@ -51,23 +60,66 @@ const usersSchema = new mongoose_1.Schema({
             type: String,
         },
     ],
+    friends: [
+        {
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: Date
 });
 usersSchema.pre("save", async function (next) {
     this.wasNew = this.isNew;
     if (this.isModified("password")) {
         this.password = await (0, utils_1.createHash)(this.password);
     }
-    if (this.isModified("passwordOtp")) {
+    if (this.isDirectModified("passwordOtp.otp")) {
         if (this.passwordOtp) {
             this.passwordOtp.otp = await (0, utils_1.createHash)(this.passwordOtp.otp);
         }
+    }
+    if (this.isDirectModified("emailOtp.otp")) {
+        if (this.emailOtp) {
+            utils_1.emailEmitter.publish(common_1.Events.confirmEmail, {
+                to: this.email,
+                subject: "2FA OTP",
+                html: (0, utils_1.template)(this.emailOtp.otp, `${this.firstName} ${this.lastName}`, "2FA OTP"),
+            });
+            this.emailOtp.otp = await (0, utils_1.createHash)(this.emailOtp.otp);
+        }
+    }
+    if (this.isModified("tempEmail") && this.tempEmail) {
+        const tempOtp = (0, utils_1.generateOTP)();
+        const otp = (0, utils_1.generateOTP)();
+        this.tempEmailOtp = {
+            otp: await (0, utils_1.createHash)(tempOtp),
+            expiresAt: new Date(Date.now() + Number(process.env.OTP_EXPIRATION)),
+        };
+        this.emailOtp = {
+            otp: await (0, utils_1.createHash)(otp),
+            expiresAt: new Date(Date.now() + Number(process.env.OTP_EXPIRATION)),
+        };
+        utils_1.emailEmitter.publish(common_1.Events.confirmEmail, {
+            to: this.tempEmail,
+            subject: "Confirm Email Change",
+            html: (0, utils_1.template)(tempOtp, `${this.firstName} ${this.lastName}`, "Confirm Email Change"),
+        });
+        utils_1.emailEmitter.publish(common_1.Events.confirmEmail, {
+            to: this.email,
+            subject: "Confirm Email Change",
+            html: (0, utils_1.template)(otp, `${this.firstName} ${this.lastName}`, "Confirm Email Change"),
+        });
     }
 });
 usersSchema.post("save", async function (doc, next) {
     const that = this;
     if (that.wasNew) {
         const otp = (0, utils_1.generateOTP)();
-        utils_1.emailEmitter.publish(index_1.Events.confirmEmail, {
+        utils_1.emailEmitter.publish(common_1.Events.confirmEmail, {
             to: that.email,
             subject: "Confirm Email",
             html: (0, utils_1.template)(otp, `${that.firstName} ${that.lastName}`, "Confirm Email"),
@@ -78,7 +130,6 @@ usersSchema.post("save", async function (doc, next) {
         };
         await that.save();
     }
-    console.log(this.isModified("password"));
 });
 exports.User = (0, mongoose_1.model)("User", usersSchema);
 exports.default = exports.User;

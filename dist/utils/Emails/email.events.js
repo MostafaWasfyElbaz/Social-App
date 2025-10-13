@@ -17,9 +17,12 @@ class EmailEvents {
     };
 }
 exports.emailEmitter = new EmailEvents(new events_1.EventEmitter());
-exports.emailEmitter.subscribe(index_1.Events.confirmEmail, ({ to, subject, html }) => {
+exports.emailEmitter.subscribe(index_1.Events.confirmEmail, ({ to, subject = "Confirm Email", html }) => {
     (0, send_email_1.sendEmail)(to, subject, html);
 });
-exports.emailEmitter.subscribe(index_1.Events.resetPassword, ({ to, subject, html }) => {
+exports.emailEmitter.subscribe(index_1.Events.resetPassword, ({ to, subject = "Reset Password", html }) => {
+    (0, send_email_1.sendEmail)(to, subject, html);
+});
+exports.emailEmitter.subscribe(index_1.Events.general, ({ to, subject, html }) => {
     (0, send_email_1.sendEmail)(to, subject, html);
 });

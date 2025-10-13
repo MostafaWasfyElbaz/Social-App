@@ -1,15 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const index_1 = require("../../DB/index");
-const index_2 = require("../../utils/index");
-const stream_1 = require("stream");
-const util_1 = require("util");
-const pipelinePromise = (0, util_1.promisify)(stream_1.pipeline);
+const index_1 = require("../../utils/index");
 class UserServices {
-    userRepo;
     s3Services;
-    constructor(userRepo = new index_1.UserRepository(), s3Services = new index_2.S3Services()) {
-        this.userRepo = userRepo;
+    constructor(s3Services = new index_1.S3Services()) {
         this.s3Services = s3Services;
     }
     uploadProfilePicture = async (req, res, next) => {
@@ -22,7 +16,7 @@ class UserServices {
             });
             user.profileImage = Key;
             await user.save();
-            return (0, index_2.successHandler)({
+            return (0, index_1.successHandler)({
                 res,
                 msg: "Profile picture uploaded successfully",
                 data: { Key },
@@ -30,7 +24,7 @@ class UserServices {
             });
         }
         catch (error) {
-            next(error);
+            throw error;
         }
     };
     uploadFileWithPreSignedUrl = async (req, res, next) => {
@@ -42,7 +36,7 @@ class UserServices {
                 Originalname,
                 Path: `${user._id}/presigned-profilePicture`,
             });
-            return (0, index_2.successHandler)({
+            return (0, index_1.successHandler)({
                 res,
                 msg: "PreSigned URL generated successfully",
                 data: { url, Key },
@@ -50,7 +44,7 @@ class UserServices {
             });
         }
         catch (error) {
-            next(error);
+            throw error;
         }
     };
     uploadCoverImages = async (req, res, next) => {
@@ -63,7 +57,7 @@ class UserServices {
             });
             user.coverImages = keys;
             await user.save();
-            return (0, index_2.successHandler)({
+            return (0, index_1.successHandler)({
                 res,
                 msg: "Cover images uploaded successfully",
                 data: { keys },
@@ -71,7 +65,7 @@ class UserServices {
             });
         }
         catch (error) {
-            next(error);
+            throw error;
         }
     };
     getFilesOrDownload = async (req, res, next) => {
@@ -82,16 +76,21 @@ class UserServices {
             const file = await this.s3Services.getAsset({ Key });
             const stream = file.Body;
             if (!file?.Body) {
-                throw new index_2.notFoundError();
+                throw new index_1.notFoundError();
             }
             res.set("Content-Type", file.ContentType);
             if (downloadName) {
                 res.set("Content-Disposition", `attachment; filename=${downloadName}.${Key.split('.').pop()}`);
             }
-            return await pipelinePromise(stream, res);
+            return (0, index_1.successHandler)({
+                res,
+                msg: "File downloaded successfully",
+                data: { stream },
+                status: 200,
+            });
         }
         catch (error) {
-            next(error);
+            throw error;
         }
     };
     getFilesOrDownloadPreSignedUrl = async (req, res, next) => {
@@ -100,7 +99,7 @@ class UserServices {
             const { downloadName, download } = req.query;
             const Key = path.join("/");
             const url = await this.s3Services.getAssetPreSignedUrl({ Key: Key, downloadName: downloadName, download: download });
-            return (0, index_2.successHandler)({
+            return (0, index_1.successHandler)({
                 res,
                 msg: "link generated successfully",
                 data: { url },
@@ -108,7 +107,7 @@ class UserServices {
             });
         }
         catch (error) {
-            next(error);
+            throw error;
         }
     };
     deleteProfileImage = async (req, res, next) => {
@@ -116,10 +115,10 @@ class UserServices {
             const { path } = req.params;
             const Key = path.join("/");
             if (res.locals.user.profileImage !== Key) {
-                throw new index_2.unauthorizedError();
+                throw new index_1.unauthorizedError();
             }
             const file = await this.s3Services.deleteAsset({ Key });
-            return (0, index_2.successHandler)({
+            return (0, index_1.successHandler)({
                 res,
                 msg: "profile image deleted successfully",
                 data: { file },
@@ -127,22 +126,22 @@ class UserServices {
             });
         }
         catch (error) {
-            next(error);
+            throw error;
         }
     };
     deleteCoverImages = async (req, res, next) => {
         try {
             const { urls } = req.body;
             if (urls.length === 0) {
-                throw new index_2.notFoundError();
+                throw new index_1.notFoundError();
             }
             for (const url of urls) {
                 if (!res.locals.user.coverImages.includes(url)) {
-                    throw new index_2.unauthorizedError();
+                    throw new index_1.unauthorizedError();
                 }
             }
             const file = await this.s3Services.deleteAssets({ urls });
-            return (0, index_2.successHandler)({
+            return (0, index_1.successHandler)({
                 res,
                 msg: "cover images deleted successfully",
                 data: { file },
@@ -150,7 +149,25 @@ class UserServices {
             });
         }
         catch (error) {
-            next(error);
+            throw error;
+        }
+    };
+    updateUserBasicInfo = async (req, res, next) => {
+        try {
+            const user = res.locals.user;
+            const { firstName, lastName } = req.body;
+            user.firstName = firstName || user.firstName;
+            user.lastName = lastName || user.lastName;
+            await user.save();
+            return (0, index_1.successHandler)({
+                res,
+                msg: "User info updated successfully",
+                data: { user },
+                status: 200,
+            });
+        }
+        catch (error) {
+            throw error;
         }
     };
 }

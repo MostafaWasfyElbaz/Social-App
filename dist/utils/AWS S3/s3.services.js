@@ -14,7 +14,7 @@ class S3Services {
         const command = new client_s3_1.PutObjectCommand({
             Bucket,
             ACL,
-            Key: `${process.env.APP_NAME}/${Path}/${(0, nanoid_1.nanoid)(15)}_${file.originalname}`,
+            Key: `${process.env.APP_NAME}/users/${Path}/${(0, nanoid_1.nanoid)(15)}_${file.originalname}`,
             Body: storeIn == index_1.StoreIn.memory ? file.buffer : (0, fs_1.createReadStream)(file.path),
             ContentType: file.mimetype,
         });
@@ -31,7 +31,7 @@ class S3Services {
             params: {
                 Bucket,
                 ACL,
-                Key: `${process.env.APP_NAME}/${Path}/${(0, nanoid_1.nanoid)(15)}_${file.originalname}`,
+                Key: `${process.env.APP_NAME}/users/${Path}/${(0, nanoid_1.nanoid)(15)}_${file.originalname}`,
                 Body: storeIn == index_1.StoreIn.memory ? file.buffer : (0, fs_1.createReadStream)(file.path),
                 ContentType: file.mimetype,
             },

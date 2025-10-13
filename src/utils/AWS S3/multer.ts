@@ -3,7 +3,7 @@ import { Request } from "express";
 import { fileSizeError, invalidFileTypeError } from "../index";
 import { StoreIn } from "../../common/index";
 
-const MimeType ={
+export const MimeType ={
     images:["image/jpeg","image/jpg","image/png"],
 }
 

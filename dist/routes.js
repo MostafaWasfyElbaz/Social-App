@@ -36,6 +36,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const modules = __importStar(require("./modules/index"));
 const baseRouter = (0, express_1.Router)();
-baseRouter.use("/user", modules.userRouter);
-baseRouter.use("/auth", modules.authRouter);
+const routes = {
+    user: "/user",
+    auth: "/auth",
+    post: "/post",
+};
+baseRouter.use(routes.user, modules.userRouter);
+baseRouter.use(routes.auth, modules.authRouter);
+baseRouter.use(routes.post, modules.postRouter);
 exports.default = baseRouter;

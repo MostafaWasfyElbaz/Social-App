@@ -18,13 +18,19 @@ export const emailEmitter = new EmailEvents(new EventEmitter());
 
 emailEmitter.subscribe(
   Events.confirmEmail,
-  ({ to, subject, html }: { to: string; subject: string; html: string }) => {
+  ({ to, subject="Confirm Email", html }: { to: string; subject?: string; html: string }) => {
     sendEmail(to, subject, html);
   }
 );
 
 emailEmitter.subscribe(
   Events.resetPassword,
+  ({ to, subject="Reset Password", html }: { to: string; subject?: string; html: string }) => {
+    sendEmail(to, subject, html);
+  }
+);
+emailEmitter.subscribe(
+  Events.general,
   ({ to, subject, html }: { to: string; subject: string; html: string }) => {
     sendEmail(to, subject, html);
   }

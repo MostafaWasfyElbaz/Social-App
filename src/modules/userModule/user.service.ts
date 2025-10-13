@@ -1,22 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import { IUserServices, IUser } from "../../common/index";
-import { UserRepository } from "../../DB/index";
 import { notFoundError, S3Services, successHandler, unauthorizedError } from "../../utils/index";
 import { HydratedDocument } from "mongoose";
-import {pipeline} from "stream";
-import { promisify } from "util";
-const pipelinePromise = promisify(pipeline);
 
 class UserServices implements IUserServices {
   constructor(
-    private userRepo = new UserRepository(),
     private s3Services = new S3Services()
   ) {}
   uploadProfilePicture = async (
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<Response> => {
     try {
       const user = res.locals.user as HydratedDocument<IUser>;
       const { file } = req;
@@ -33,7 +28,7 @@ class UserServices implements IUserServices {
         status: 200,
       });
     } catch (error) {
-      next(error);
+      throw error;
     }
   };
 
@@ -41,7 +36,7 @@ class UserServices implements IUserServices {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<Response> => {
     try {
       const user = res.locals.user as HydratedDocument<IUser>;
       const { ContentType,Originalname } = req.body;
@@ -57,7 +52,7 @@ class UserServices implements IUserServices {
         status: 200,
       });
     } catch (error) {
-      next(error);
+      throw error;
     }
   };
 
@@ -65,7 +60,7 @@ class UserServices implements IUserServices {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<Response> => {
     try {
       const user = res.locals.user as HydratedDocument<IUser>;
       const { files } = req;
@@ -82,7 +77,7 @@ class UserServices implements IUserServices {
         status: 200,
       });
     } catch (error) {
-      next(error);
+      throw error;
     }
   };
 
@@ -90,7 +85,7 @@ class UserServices implements IUserServices {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<Response> => {
     try {
       const { path } = req.params as unknown as {path:string[]};
       const {downloadName} = req.query as {downloadName?:string};
@@ -104,9 +99,14 @@ class UserServices implements IUserServices {
       if(downloadName){
         res.set("Content-Disposition", `attachment; filename=${downloadName}.${Key.split('.').pop()}`);
       }
-      return await pipelinePromise(stream,res);
+      return successHandler({
+        res,
+        msg: "File downloaded successfully",
+        data: { stream },
+        status: 200,
+      });
     } catch (error) {
-      next(error);
+      throw error;
     }
   };
 
@@ -114,7 +114,7 @@ class UserServices implements IUserServices {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<Response> => {
     try {
       const { path } = req.params as unknown as {path:string[]};
       const {downloadName,download} = req.query as {downloadName?:string,download?:string};
@@ -127,7 +127,7 @@ class UserServices implements IUserServices {
         status: 200,
       });
     } catch (error) {
-      next(error);
+      throw error;
     }
   };
   
@@ -135,7 +135,7 @@ class UserServices implements IUserServices {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<Response> => {
     try {
       const { path } = req.params as unknown as {path:string[]};
       const Key = path.join("/")
@@ -150,7 +150,7 @@ class UserServices implements IUserServices {
         status: 200,
       });
     } catch (error) {
-      next(error);
+      throw error;
     }
   };
 
@@ -158,7 +158,7 @@ class UserServices implements IUserServices {
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<Response | void> => {
+  ): Promise<Response> => {
     try {
       const { urls } = req.body as unknown as {urls:string[]};
       if(urls.length === 0){
@@ -177,7 +177,29 @@ class UserServices implements IUserServices {
         status: 200,
       });
     } catch (error) {
-      next(error);
+      throw error;
+    }
+  };
+
+  updateUserBasicInfo = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    try {
+      const user = res.locals.user as HydratedDocument<IUser>;
+      const { firstName, lastName } = req.body;
+      user.firstName = firstName || user.firstName;
+      user.lastName = lastName || user.lastName;
+      await user.save();
+      return successHandler({
+        res,
+        msg: "User info updated successfully",
+        data: { user },
+        status: 200,
+      });
+    } catch (error) {
+      throw error;
     }
   };
 }
