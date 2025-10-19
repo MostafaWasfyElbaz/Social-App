@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { generalValidation } from "../../utils/general.validation";
+import { generalValidation } from "../../utils";
 
 export const createPostSchema = z
   .object({
@@ -22,4 +22,20 @@ export const createPostSchema = z
 export const likeUnlikePostSchema = z.object({
     postId: z.string().length(24),
     action: z.enum(["like", "unlike"]),
+})
+
+export const checkPostIdSchema = z.object({
+    postId: z.string().length(24),
+})
+
+export const updatePostSchema = z.object({
+    postId: z.string().length(24),
+    content: generalValidation.content,
+    files: generalValidation.files({}),
+    tags: generalValidation.tags,
+    allowComments: generalValidation.allowComments,
+    availability: generalValidation.availability,
+    removedAttachments: z.array(z.string().length(24)),
+    removedTags: z.array(z.string().length(24)),
+    newTags: z.array(z.string().length(24)),
 })

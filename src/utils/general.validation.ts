@@ -3,8 +3,17 @@ import { PostAvailability } from "../common";
 import { MimeType } from "./index";
 
 export const generalValidation = {
-    content: z.string().optional(),
-    files:({Types=MimeType.images,fieldName="attachments"}: {Types?:string[],fieldName?:string}) =>{ return z
+  to: z.string().length(24),
+  from: z.string().length(24),
+  content: z.string().optional(),
+  files: ({
+    Types = MimeType.images,
+    fieldName = "attachments",
+  }: {
+    Types?: string[];
+    fieldName?: string;
+  }) => {
+    return z
       .array(
         z.object({
           fieldname: z.enum([fieldName]),
@@ -16,15 +25,17 @@ export const generalValidation = {
           size: z.number(),
         })
       )
-      .optional()},
-    tags: z.array(z.string()).optional(),
-    allowComments: z.boolean().optional().default(true),
-    availability: z
-      .enum([
-        PostAvailability.FRIENDS,
-        PostAvailability.PRIVATE,
-        PostAvailability.PUBLIC,
-      ])
-      .optional()
-      .default(PostAvailability.PUBLIC),
-}
+      .optional();
+  },
+  tags: z.array(z.string()).optional(),
+  allowComments: z.boolean().optional().default(true),
+  availability: z
+    .enum([
+      PostAvailability.FRIENDS,
+      PostAvailability.PRIVATE,
+      PostAvailability.PUBLIC,
+    ])
+    .optional()
+    .default(PostAvailability.PUBLIC),
+};
+

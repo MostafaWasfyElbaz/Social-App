@@ -49,7 +49,13 @@ const postSchema = new Schema<IPost>(
     },
     isDeleted: {
       type: Boolean,
-      default: false,
+    },
+    deletedAt: {
+      type: Date,
+    },
+    deletedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
     assetsFolderId: {
       type: String,
@@ -66,8 +72,21 @@ const postSchema = new Schema<IPost>(
   },
   {
     timestamps: true,
+    strictQuery: true,
+    toJSON: {
+      virtuals: true,
+    },
+    toObject: {
+      virtuals: true,
+    },
   }
 );
+
+postSchema.virtual("comments", {
+  ref: "Comment",           
+  localField: "_id",        
+  foreignField: "postId",   
+});
 
 postSchema.pre("save", async function (next) {
   if (this.isDirectModified("tags")) {
@@ -89,6 +108,17 @@ postSchema.pre("save", async function (next) {
   next();
 });
 
+postSchema.pre(["find", "findOne"], async function (next) {
+  
+  if (!this.getFilter().paranoid) {
+    this.setQuery({ ...this.getQuery() });
+    next();
+  }
+  this.setQuery({ ...this.getQuery(), isDeleted: { $exists : false } });
+  next();
+});
+
 export const Post = model<IPost>("Post", postSchema);
 
 export type PostModel = HydratedDocument<IPost>;
+

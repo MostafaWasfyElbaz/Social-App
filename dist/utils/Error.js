@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tooManyRequestsError = exports.tryResendOtp = exports.faildToCreatePost = exports.invalidTagsError = exports.unauthorizedError = exports.failedToUpload = exports.fileSizeError = exports.invalidFileTypeError = exports.userNotConfirmedError = exports.otpNotExpiredError = exports.invalidCredentialsError = exports.otpExpiredError = exports.userAlreadyConfirmedError = exports.failedToGenerateLink = exports.notFoundError = exports.failedToCreateUser = exports.userExistError = exports.validationError = exports.ApplicationException = void 0;
+exports.unableToSetFriendRequest = exports.failedToCreateComment = exports.tooManyRequestsError = exports.tryResendOtp = exports.faildToCreatePost = exports.invalidTagsError = exports.unauthorizedError = exports.failedToUpload = exports.fileSizeError = exports.invalidFileTypeError = exports.userNotConfirmedError = exports.otpNotExpiredError = exports.invalidCredentialsError = exports.otpExpiredError = exports.userAlreadyConfirmedError = exports.failedToGenerateLink = exports.notFoundError = exports.failedToCreateUser = exports.userExistError = exports.validationError = exports.ApplicationException = void 0;
 class ApplicationException extends Error {
     statusCode;
     constructor(msg, statusCode, options) {
@@ -117,3 +117,15 @@ class tooManyRequestsError extends ApplicationException {
     }
 }
 exports.tooManyRequestsError = tooManyRequestsError;
+class failedToCreateComment extends ApplicationException {
+    constructor(msg = "Failed to create comment", statusCode = 500) {
+        super(msg, statusCode);
+    }
+}
+exports.failedToCreateComment = failedToCreateComment;
+class unableToSetFriendRequest extends ApplicationException {
+    constructor(msg = "Unable to set friend request", statusCode = 400) {
+        super(msg, statusCode);
+    }
+}
+exports.unableToSetFriendRequest = unableToSetFriendRequest;

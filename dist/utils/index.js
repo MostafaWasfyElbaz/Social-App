@@ -24,3 +24,4 @@ __exportStar(require("./success.handler"), exports);
 __exportStar(require("./AWS S3/s3.services"), exports);
 __exportStar(require("./AWS S3/multer"), exports);
 __exportStar(require("./AWS S3/s3Config"), exports);
+__exportStar(require("./general.validation"), exports);

@@ -8,8 +8,10 @@ const zod_1 = __importDefault(require("zod"));
 const common_1 = require("../common");
 const index_1 = require("./index");
 exports.generalValidation = {
+    to: zod_1.default.string().length(24),
+    from: zod_1.default.string().length(24),
     content: zod_1.default.string().optional(),
-    files: ({ Types = index_1.MimeType.images, fieldName = "attachments" }) => {
+    files: ({ Types = index_1.MimeType.images, fieldName = "attachments", }) => {
         return zod_1.default
             .array(zod_1.default.object({
             fieldname: zod_1.default.enum([fieldName]),

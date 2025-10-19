@@ -5,7 +5,7 @@ import {
   userNotConfirmedError,
 } from "../utils/index";
 import { IUser, TokenType, IPayload } from "../common/index";
-import { UserRepository } from "../DB/index";
+import  UserRepository from "../DB/Repository/user.repository";
 import { Request, Response, NextFunction } from "express";
 import { HydratedDocument } from "mongoose";
 

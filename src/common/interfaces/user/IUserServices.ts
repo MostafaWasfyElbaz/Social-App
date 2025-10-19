@@ -31,4 +31,34 @@ export interface IUserServices {
     res: Response,
     next: NextFunction
   ): Promise<Response>;
+  sendFriendRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response>;
+  deleteFriendRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response>;
+  unfriend(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response>;
+  acceptFriendRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response>;
+  blockUser(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response>;
+  rejectFriendRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response>;
 }

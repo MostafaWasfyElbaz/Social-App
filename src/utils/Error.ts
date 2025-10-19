@@ -114,4 +114,14 @@ export class tooManyRequestsError extends ApplicationException {
     }
 }
 
+export class failedToCreateComment extends ApplicationException {
+    constructor(msg:string = "Failed to create comment", statusCode: number = 500) {
+        super(msg, statusCode);
+    }
+}
 
+export class unableToSetFriendRequest extends ApplicationException {
+    constructor(msg:string = "Unable to set friend request", statusCode: number = 400) {
+        super(msg, statusCode);
+    }
+}

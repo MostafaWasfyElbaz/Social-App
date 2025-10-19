@@ -70,7 +70,17 @@ const usersSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false
     },
-    deletedAt: Date
+    deletedAt: Date,
+    deletedBy: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    blockList: [
+        {
+            type: mongoose_1.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ]
 });
 usersSchema.pre("save", async function (next) {
     this.wasNew = this.isNew;
@@ -114,6 +124,14 @@ usersSchema.pre("save", async function (next) {
             html: (0, utils_1.template)(otp, `${this.firstName} ${this.lastName}`, "Confirm Email Change"),
         });
     }
+});
+usersSchema.pre(["find", "findOne"], async function (next) {
+    if (!this.getFilter().paranoid) {
+        this.setQuery({ ...this.getQuery() });
+        next();
+    }
+    this.setQuery({ ...this.getQuery(), isDeleted: { $exists: false } });
+    next();
 });
 usersSchema.post("save", async function (doc, next) {
     const that = this;

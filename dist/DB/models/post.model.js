@@ -50,7 +50,13 @@ const postSchema = new mongoose_1.Schema({
     },
     isDeleted: {
         type: Boolean,
-        default: false,
+    },
+    deletedAt: {
+        type: Date,
+    },
+    deletedBy: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
     },
     assetsFolderId: {
         type: String,
@@ -66,6 +72,18 @@ const postSchema = new mongoose_1.Schema({
     },
 }, {
     timestamps: true,
+    strictQuery: true,
+    toJSON: {
+        virtuals: true,
+    },
+    toObject: {
+        virtuals: true,
+    },
+});
+postSchema.virtual("comments", {
+    ref: "Comment",
+    localField: "_id",
+    foreignField: "postId",
 });
 postSchema.pre("save", async function (next) {
     if (this.isDirectModified("tags")) {
@@ -79,6 +97,14 @@ postSchema.pre("save", async function (next) {
             html: "",
         }));
     }
+    next();
+});
+postSchema.pre(["find", "findOne"], async function (next) {
+    if (!this.getFilter().paranoid) {
+        this.setQuery({ ...this.getQuery() });
+        next();
+    }
+    this.setQuery({ ...this.getQuery(), isDeleted: { $exists: false } });
     next();
 });
 exports.Post = (0, mongoose_1.model)("Post", postSchema);

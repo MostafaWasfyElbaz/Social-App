@@ -69,7 +69,17 @@ const usersSchema = new Schema<IUser>({
     type:Boolean,
     default:false
   },
-  deletedAt:Date
+  deletedAt:Date,
+  deletedBy:{
+    type:Schema.Types.ObjectId,
+    ref:"User"
+  },
+  blockList:[
+    {
+      type:Schema.Types.ObjectId,
+      ref:"User"
+    }
+  ]
 });
 
 usersSchema.pre(
@@ -131,6 +141,16 @@ usersSchema.pre(
     }
   }
 );
+
+usersSchema.pre(["find", "findOne"], async function (next) {
+  if (!this.getFilter().paranoid) {
+    this.setQuery({ ...this.getQuery() });
+    next();
+  }
+  this.setQuery({ ...this.getQuery(), isDeleted: { $exists : false } });
+  next();
+});
+
 
 usersSchema.post("save", async function (doc, next) {
   const that = this as HydratedDocument<IUser> & { wasNew: boolean };

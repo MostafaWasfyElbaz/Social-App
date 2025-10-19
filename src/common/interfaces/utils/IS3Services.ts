@@ -1,5 +1,5 @@
 import { ObjectCannedACL } from "@aws-sdk/client-s3";
-import { StoreIn } from "../index";
+import { StoreIn } from "../../index";
 import {
   GetObjectCommandOutput,
   DeleteObjectCommandOutput,

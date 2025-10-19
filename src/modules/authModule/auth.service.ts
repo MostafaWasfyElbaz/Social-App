@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRepository } from "../../DB";
 import { IAuthServices, Events, Gender, TokenType, IUser } from "../../common";
+import UserRepository from "../../DB/Repository/user.repository";
 import {
   generateOTP,
   emailEmitter,
@@ -292,6 +292,7 @@ class AuthServices implements IAuthServices {
       throw error;
     }
   };
+  
   refreshToken = async (
     req: Request,
     res: Response,

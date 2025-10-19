@@ -1,10 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.auth = exports.decodeToken = void 0;
 const index_1 = require("../utils/index");
 const index_2 = require("../common/index");
-const index_3 = require("../DB/index");
-const userModel = new index_3.UserRepository();
+const user_repository_1 = __importDefault(require("../DB/Repository/user.repository"));
+const userModel = new user_repository_1.default();
 const decodeToken = async ({ authorization, tokenType = index_2.TokenType.access, }) => {
     try {
         if (!authorization) {

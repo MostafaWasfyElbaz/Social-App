@@ -13,6 +13,7 @@ const authServices = new auth_service_1.default();
 const routes = {
     signup: "/signup",
     login: "/login",
+    _2FA: "/2fa",
     refreshToken: "/refresh-token",
     confirmEmail: "/confirm-email",
     resendEmailOtp: "/resend-email-otp",
@@ -22,7 +23,6 @@ const routes = {
     resetPassword: "/reset-password",
     updateEmail: "/update-email",
     confirmEmailChange: "/confirm-email-change",
-    _2FA: "/2fa",
 };
 router.post(routes.signup, (0, middleware_1.validationMiddleware)(auth_validation_1.signupSchema), authServices.signup);
 router.post(routes.login, (0, middleware_1.validationMiddleware)(auth_validation_1.loginSchema), authServices.login);

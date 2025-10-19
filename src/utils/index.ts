@@ -8,3 +8,4 @@ export * from "./success.handler";
 export * from "./AWS S3/s3.services";
 export * from "./AWS S3/multer";
 export * from "./AWS S3/s3Config";
+export * from "./general.validation";

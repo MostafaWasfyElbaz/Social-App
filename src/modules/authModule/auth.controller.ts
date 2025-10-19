@@ -21,6 +21,7 @@ const authServices: IAuthServices = new AuthServices();
 const routes = {
   signup: "/signup",
   login: "/login",
+  _2FA: "/2fa",
   refreshToken: "/refresh-token",
   confirmEmail: "/confirm-email",
   resendEmailOtp: "/resend-email-otp",
@@ -30,7 +31,6 @@ const routes = {
   resetPassword: "/reset-password",
   updateEmail: "/update-email",
   confirmEmailChange: "/confirm-email-change",
-  _2FA: "/2fa",
 };
 
 router.post(

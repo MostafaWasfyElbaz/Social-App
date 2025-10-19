@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const DB_1 = require("../../DB");
 const common_1 = require("../../common");
+const user_repository_1 = __importDefault(require("../../DB/Repository/user.repository"));
 const utils_1 = require("../../utils");
 const middleware_1 = require("../../middleware");
 class AuthServices {
     userRepo;
-    constructor(userRepo = new DB_1.UserRepository()) {
+    constructor(userRepo = new user_repository_1.default()) {
         this.userRepo = userRepo;
     }
     signup = async (req, res, next) => {

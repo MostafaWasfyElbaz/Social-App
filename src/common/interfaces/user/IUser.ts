@@ -1,4 +1,4 @@
-import { Gender, IOtp } from "../index";
+import { Gender, IOtp } from "../../index";
 import { Document, Types } from "mongoose";
 
 export interface IUser extends Document {
@@ -8,17 +8,19 @@ export interface IUser extends Document {
   email: string;
   gender?: Gender;
   password: string;
-  emailOtp?: IOtp|undefined;
-  passwordOtp?: IOtp|undefined;
+  emailOtp?: IOtp | undefined;
+  passwordOtp?: IOtp | undefined;
   phone: string;
   isConfirmed: boolean;
   changedCredentialsAt: Date;
   profileImage?: string;
   coverImages?: string[];
   tempEmail?: string | undefined;
-  tempEmailOtp?: IOtp | undefined ;
+  tempEmailOtp?: IOtp | undefined;
   _2FA?: boolean;
-  friends:Types.ObjectId[];
-  isDeleted?:boolean;
-  deletedAt?:Date;
+  friends: Types.ObjectId[];
+  isDeleted?: boolean;
+  deletedAt?: Date;
+  deletedBy?: Types.ObjectId | undefined;
+  blockList: Types.ObjectId[];
 }
