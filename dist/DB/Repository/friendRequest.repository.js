@@ -25,11 +25,16 @@ class FriendRequestRepository extends db_repository_1.default {
         if (request) {
             throw new utils_1.unableToSetFriendRequest();
         }
-        return await this.model.create({
-            from: user._id,
-            to: friend._id,
-            email: friend.email,
+        const [createdUser] = await this.create({
+            data: [
+                {
+                    from: user._id,
+                    to: friend._id,
+                    email: friend.email,
+                },
+            ],
         });
+        return createdUser;
     };
     acceptFriendRequest = async ({ friendRequest, }) => {
         await this.updateOne({

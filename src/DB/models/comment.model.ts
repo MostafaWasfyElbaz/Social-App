@@ -30,7 +30,10 @@ const commentSchema = new Schema<IComment>(
       },
     ],
     deletedAt: Date,
-    isDeleted: Boolean,
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -63,7 +66,7 @@ commentSchema.pre(["find", "findOne"], async function (next) {
     this.setQuery({ ...this.getQuery() });
     next();
   }
-  this.setQuery({ ...this.getQuery(), isDeleted: { $exists: false } });
+  this.setQuery({ ...this.getQuery(), isDeleted: { $ne: true } });
   next();
 });
 

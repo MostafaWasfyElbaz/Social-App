@@ -136,7 +136,7 @@ class PostServices {
                 postId: postId,
                 user,
                 data: {
-                    isDeleted: undefined,
+                    isDeleted: false,
                     deletedAt: undefined,
                     deletedBy: undefined,
                 },

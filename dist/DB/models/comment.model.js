@@ -31,7 +31,10 @@ const commentSchema = new mongoose_1.Schema({
         },
     ],
     deletedAt: Date,
-    isDeleted: Boolean,
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     timestamps: true,
     strictQuery: true,
@@ -55,7 +58,7 @@ commentSchema.pre(["find", "findOne"], async function (next) {
         this.setQuery({ ...this.getQuery() });
         next();
     }
-    this.setQuery({ ...this.getQuery(), isDeleted: { $exists: false } });
+    this.setQuery({ ...this.getQuery(), isDeleted: { $ne: true } });
     next();
 });
 exports.Comment = (0, mongoose_1.model)("Comment", commentSchema);

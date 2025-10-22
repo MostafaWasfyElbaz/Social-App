@@ -139,7 +139,7 @@ export class PostServices implements IPostServices {
       await this.postRepository.findMyPostAndFreezeUnfreezeDelete({
         postId: postId as unknown as Types.ObjectId,
         user,
-        data: { isDeleted: true, deletedAt: new Date(), deletedBy: user._id },
+        data: { isDeleted: true, deletedAt: new Date(), deletedBy: user._id as Types.ObjectId },
         action: "freeze",
       });
       return successHandler({
@@ -164,7 +164,7 @@ export class PostServices implements IPostServices {
         postId: postId as unknown as Types.ObjectId,
         user,
         data: {
-          isDeleted: undefined,
+          isDeleted: false,
           deletedAt: undefined,
           deletedBy: undefined,
         },

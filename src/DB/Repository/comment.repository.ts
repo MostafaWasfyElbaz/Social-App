@@ -47,7 +47,7 @@ export default class CommentRepository
           content,
           postId,
           tags,
-          createdBy: user._id,
+          createdBy: user._id as Types.ObjectId,
         },
       ],
     });
@@ -59,9 +59,11 @@ export default class CommentRepository
     type: "my" | "all" = "my"
   ): Promise<HydratedDocument<IComment>> => {
     const postRepo = await this.getPostRepo();
-    const comment = await this.model.findOne({
-      _id: commentId,
-      ...(type === "my" ? { createdBy: user._id } : {}),
+    const comment = await this.findOne({
+      filter: {
+        _id: commentId,
+        ...(type === "my" ? { createdBy: user._id } : {}),
+      },
     });
     if (!comment) {
       throw new notFoundError();

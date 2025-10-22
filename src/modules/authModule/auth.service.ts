@@ -53,13 +53,15 @@ class AuthServices implements IAuthServices {
         _2FA,
       }: signupDTO = req.body;
       const user = await this.userRepo.createUser({
-        firstName,
-        lastName,
-        email,
-        password,
-        gender: gender || Gender.male,
-        phone,
-        _2FA,
+        user: {
+          firstName,
+          lastName,
+          email,
+          password,
+          gender: gender || Gender.male,
+          phone,
+          _2FA,
+        },
       });
       if (!user) {
         throw new failedToCreateUser();
@@ -119,7 +121,11 @@ class AuthServices implements IAuthServices {
       user.isConfirmed = true;
       user.emailOtp = undefined;
       await user.save();
-      return successHandler({ res, msg: "Email confirmed successfully", status: 200 });
+      return successHandler({
+        res,
+        msg: "Email confirmed successfully",
+        status: 200,
+      });
     } catch (error) {
       throw error;
     }
@@ -180,7 +186,11 @@ class AuthServices implements IAuthServices {
         subject,
         html,
       });
-      return successHandler({ res, msg: "Email confirmed successfully", status: 200 });
+      return successHandler({
+        res,
+        msg: "Email confirmed successfully",
+        status: 200,
+      });
     } catch (error) {
       throw error;
     }
@@ -244,9 +254,9 @@ class AuthServices implements IAuthServices {
     next: NextFunction
   ): Promise<Response> => {
     try {
-      const user:HydratedDocument<IUser> = res.locals.user;
+      const user: HydratedDocument<IUser> = res.locals.user;
       const { otp }: _2FADTO = req.body;
-      if(!user.emailOtp){
+      if (!user.emailOtp) {
         throw new tryResendOtp();
       }
       if (
@@ -266,7 +276,7 @@ class AuthServices implements IAuthServices {
         }
         throw new tooManyRequestsError();
       }
-      if(user.emailOtp.expiresAt <= new Date()){
+      if (user.emailOtp.expiresAt <= new Date()) {
         throw new otpExpiredError();
       }
       if (user.emailOtp.attempts) {
@@ -274,7 +284,7 @@ class AuthServices implements IAuthServices {
         await user.save();
       }
       const isMatch = await compareHash(otp, user.emailOtp.otp);
-      if(!isMatch){
+      if (!isMatch) {
         throw new invalidCredentialsError();
       }
       user.emailOtp = undefined;
@@ -292,7 +302,7 @@ class AuthServices implements IAuthServices {
       throw error;
     }
   };
-  
+
   refreshToken = async (
     req: Request,
     res: Response,
@@ -412,7 +422,11 @@ class AuthServices implements IAuthServices {
       user.changedCredentialsAt = new Date();
       user.passwordOtp = undefined;
       await user.save();
-      return successHandler({ res, msg: "Password Reset Successfully", status: 200 });
+      return successHandler({
+        res,
+        msg: "Password Reset Successfully",
+        status: 200,
+      });
     } catch (error) {
       throw error;
     }
@@ -511,7 +525,7 @@ class AuthServices implements IAuthServices {
       status: 200,
     });
   };
-  
+
   resendUpdateEmailOtp = async (
     req: Request,
     res: Response,

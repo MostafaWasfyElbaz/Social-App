@@ -8,7 +8,7 @@ export interface IPost {
   tags?: Array<Types.ObjectId>;
   likes?: Array<Types.ObjectId>;
   allowComments?: boolean;
-  isDeleted?: boolean | undefined;
+  isDeleted: boolean ;
   deletedAt?: Date | undefined;
   assetsFolderId: string;
   availability: PostAvailability;

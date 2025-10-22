@@ -78,7 +78,7 @@ class CommentService {
                 commentId,
                 user,
                 data: {
-                    isDeleted: undefined,
+                    isDeleted: false,
                     deletedAt: undefined,
                     deletedBy: undefined,
                 },

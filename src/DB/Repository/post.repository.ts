@@ -23,6 +23,7 @@ export default class PostRepository
     const users = await this.userRepository.find({
       filter: {
         _id: { $in: tags },
+        paranoid: true,
       },
       projection: { _id: 1 },
     });
@@ -30,7 +31,7 @@ export default class PostRepository
       throw new notFoundError();
     }
     if (users.length !== tags.length) {
-      const tags = users.map((tag) => tag._id.toString());
+      const tags = users.map((tag) => (tag._id as Types.ObjectId).toString());
       const invalidTags = tags.filter((tag: string) => !tags.includes(tag));
       throw new invalidTagsError(invalidTags);
     }
@@ -40,26 +41,29 @@ export default class PostRepository
     postId: Types.ObjectId,
     user: HydratedDocument<IUser>
   ): Promise<HydratedDocument<IPost>> => {
-    const post = await this.model
-      .findOne({
-        filter: {
-          _id: postId,
-          $or: availabilityFilter(user),
-        },
-      })
-      .populate("comments");
-    if (!post) {
-      throw new notFoundError();
-    }
+    const post = await this.findOne({
+      filter: {
+        _id: postId,
+        $or: availabilityFilter(user),
+        paranoid: true,
+      },
+    }).then((post) => {
+      if (!post) {
+        throw new notFoundError();
+      }
+      post.populate("comments");
+      return post;
+    });
     const createdBy = await this.userRepository.findOne({
       filter: {
+        paranoid: true,
         _id: post.createdBy,
       },
     });
     if (!createdBy) {
       throw new notFoundError();
     }
-    if(createdBy.blockList && createdBy.blockList.includes(user._id)){
+    if (createdBy.blockList && createdBy.blockList.includes(user._id as Types.ObjectId)) {
       throw new notFoundError();
     }
     return post;
@@ -70,18 +74,19 @@ export default class PostRepository
     user: HydratedDocument<IUser>,
     paranoid = true
   ): Promise<HydratedDocument<IPost>> => {
-    const post = await this.model
-      .findOne({
-        filter: {
-          _id: postId,
-          createdBy: user._id,
-        },
+    const post = await this.findOne({
+      filter: {
+        _id: postId,
+        createdBy: user._id,
         paranoid,
-      })
-      .populate("comments");
-    if (!post) {
-      throw new notFoundError();
-    }
+      },
+    }).then((post) => {
+      if (!post) {
+        throw new notFoundError();
+      }
+      post.populate("comments");
+      return post;
+    });
     return post;
   };
 
@@ -118,7 +123,7 @@ export default class PostRepository
     postId,
     user,
     data,
-    paranoid = true,
+    paranoid = false,
     action,
   }: {
     postId: Types.ObjectId;
@@ -188,7 +193,7 @@ export default class PostRepository
         attachments: {
           $setUnion: [
             {
-              $setDifference: ["$attachments", (data.removedAttachments || [])],
+              $setDifference: ["$attachments", data.removedAttachments || []],
             },
             data.attachmentsLink || [],
           ],
@@ -196,7 +201,7 @@ export default class PostRepository
         tags: {
           $setUnion: [
             {
-              $setDifference: ["$tags", (data.removedTags || [])],
+              $setDifference: ["$tags", data.removedTags || []],
             },
             data.newTags?.map((tag) => {
               return new Types.ObjectId(tag);

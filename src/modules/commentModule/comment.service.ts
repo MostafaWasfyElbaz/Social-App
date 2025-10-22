@@ -5,7 +5,7 @@ import {
   successHandler,
   notFoundError,
 } from "../../utils";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { updateCommentDTO } from "./comment.DTO";
 import CommentRepository from "../../DB/Repository/comment.repository";
 
@@ -75,7 +75,7 @@ export class CommentService implements ICommentServices {
         {
           commentId,
           user,
-          data: { isDeleted: true, deletedAt: new Date(), deletedBy: user._id },
+          data: { isDeleted: true, deletedAt: new Date(), deletedBy: user._id as Types.ObjectId },
           action: "freeze",
         }
       );
@@ -103,7 +103,7 @@ export class CommentService implements ICommentServices {
           commentId,
           user,
           data: {
-            isDeleted: undefined,
+            isDeleted: false,
             deletedAt: undefined,
             deletedBy: undefined,
           },

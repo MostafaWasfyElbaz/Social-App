@@ -50,6 +50,7 @@ const postSchema = new mongoose_1.Schema({
     },
     isDeleted: {
         type: Boolean,
+        default: false
     },
     deletedAt: {
         type: Date,
@@ -104,7 +105,7 @@ postSchema.pre(["find", "findOne"], async function (next) {
         this.setQuery({ ...this.getQuery() });
         next();
     }
-    this.setQuery({ ...this.getQuery(), isDeleted: { $exists: false } });
+    this.setQuery({ ...this.getQuery(), isDeleted: { $ne: true } });
     next();
 });
 exports.Post = (0, mongoose_1.model)("Post", postSchema);

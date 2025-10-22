@@ -49,6 +49,7 @@ const postSchema = new Schema<IPost>(
     },
     isDeleted: {
       type: Boolean,
+      default:false
     },
     deletedAt: {
       type: Date,
@@ -114,7 +115,7 @@ postSchema.pre(["find", "findOne"], async function (next) {
     this.setQuery({ ...this.getQuery() });
     next();
   }
-  this.setQuery({ ...this.getQuery(), isDeleted: { $exists : false } });
+  this.setQuery({ ...this.getQuery(), isDeleted: { $ne : true } });
   next();
 });
 

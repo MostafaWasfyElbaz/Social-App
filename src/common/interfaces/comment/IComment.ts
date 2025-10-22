@@ -7,7 +7,7 @@ export interface IComment {
   tags: Array<Types.ObjectId> | undefined;
   createdAt: Date;
   updatedAt: Date;
-  isDeleted?: boolean | undefined;
+  isDeleted: boolean ;
   deletedAt?: Date | undefined;
   deletedBy?: Types.ObjectId | undefined;
 }

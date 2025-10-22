@@ -1,7 +1,7 @@
 import DBRepository from "./db.repository";
 import { IFriendRequest, IUser, IFriendRepo } from "../../common";
 import { FriendRequestModel } from "../models/friendRequest.model";
-import { HydratedDocument } from "mongoose";
+import { HydratedDocument, Types } from "mongoose";
 import { unableToSetFriendRequest } from "../../utils";
 import UserRepository from "./user.repository";
 
@@ -30,11 +30,16 @@ export default class FriendRequestRepository
     if (request) {
       throw new unableToSetFriendRequest();
     }
-    return await this.model.create({
-      from: user._id,
-      to: friend._id,
-      email: friend.email,
+    const [createdUser ] = await this.create({
+      data: [
+        {
+          from: user._id as Types.ObjectId,
+          to: friend._id as Types.ObjectId,
+          email: friend.email,
+        },
+      ],
     });
+    return createdUser as HydratedDocument<IFriendRequest>;
   };
   
   acceptFriendRequest = async ({

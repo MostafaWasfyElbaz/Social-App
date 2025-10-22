@@ -13,14 +13,16 @@ class UserRepository extends db_repository_1.default {
         this.model = model;
     }
     findUserByEmail = async (email) => {
-        return this.model.findOne({ email });
+        const user = await this.findOne({ filter: { email } });
+        return user;
     };
-    createUser = async (user) => {
+    createUser = async ({ user, }) => {
         const isExist = await this.findUserByEmail(user.email);
         if (isExist) {
             throw new utils_1.userExistError();
         }
-        return this.model.create(user);
+        const [createdUser] = await this.create({ data: [user] });
+        return createdUser;
     };
 }
 exports.default = UserRepository;

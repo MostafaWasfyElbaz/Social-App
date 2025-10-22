@@ -75,9 +75,11 @@ class CommentRepository extends db_repository_1.default {
     };
     findComment = async (commentId, user, type = "my") => {
         const postRepo = await this.getPostRepo();
-        const comment = await this.model.findOne({
-            _id: commentId,
-            ...(type === "my" ? { createdBy: user._id } : {}),
+        const comment = await this.findOne({
+            filter: {
+                _id: commentId,
+                ...(type === "my" ? { createdBy: user._id } : {}),
+            },
         });
         if (!comment) {
             throw new utils_1.notFoundError();

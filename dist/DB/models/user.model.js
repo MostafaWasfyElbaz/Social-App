@@ -130,7 +130,7 @@ usersSchema.pre(["find", "findOne"], async function (next) {
         this.setQuery({ ...this.getQuery() });
         next();
     }
-    this.setQuery({ ...this.getQuery(), isDeleted: { $exists: false } });
+    this.setQuery({ ...this.getQuery(), isDeleted: { $ne: true } });
     next();
 });
 usersSchema.post("save", async function (doc, next) {

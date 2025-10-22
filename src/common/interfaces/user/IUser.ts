@@ -2,7 +2,6 @@ import { Gender, IOtp } from "../../index";
 import { Document, Types } from "mongoose";
 
 export interface IUser extends Document {
-  _id: Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
@@ -19,7 +18,7 @@ export interface IUser extends Document {
   tempEmailOtp?: IOtp | undefined;
   _2FA?: boolean;
   friends: Types.ObjectId[];
-  isDeleted?: boolean;
+  isDeleted: boolean;
   deletedAt?: Date;
   deletedBy?: Types.ObjectId | undefined;
   blockList: Types.ObjectId[];

@@ -14,16 +14,20 @@ export default class UserRepository
   findUserByEmail = async (
     email: string
   ): Promise<HydratedDocument<IUser> | null> => {
-    return this.model.findOne({ email });
+    const user = await this.findOne({ filter: { email } });
+    return user;
   };
 
-  createUser = async (
-    user: Partial<IUser>
-  ): Promise<HydratedDocument<IUser>> => {
+  createUser = async ({
+    user,
+  }: {
+    user: Partial<HydratedDocument<IUser>>;
+  }): Promise<HydratedDocument<IUser>> => {
     const isExist = await this.findUserByEmail(user.email as string);
     if (isExist) {
       throw new userExistError();
     }
-    return this.model.create(user);
+    const [createdUser] = await this.create({ data: [user] });
+    return createdUser as HydratedDocument<IUser>;
   };
 }

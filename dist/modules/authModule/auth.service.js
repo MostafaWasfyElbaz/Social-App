@@ -16,13 +16,15 @@ class AuthServices {
         try {
             const { firstName, lastName, email, password, gender, phone, _2FA, } = req.body;
             const user = await this.userRepo.createUser({
-                firstName,
-                lastName,
-                email,
-                password,
-                gender: gender || common_1.Gender.male,
-                phone,
-                _2FA,
+                user: {
+                    firstName,
+                    lastName,
+                    email,
+                    password,
+                    gender: gender || common_1.Gender.male,
+                    phone,
+                    _2FA,
+                },
             });
             if (!user) {
                 throw new utils_1.failedToCreateUser();
@@ -74,7 +76,11 @@ class AuthServices {
             user.isConfirmed = true;
             user.emailOtp = undefined;
             await user.save();
-            return (0, utils_1.successHandler)({ res, msg: "Email confirmed successfully", status: 200 });
+            return (0, utils_1.successHandler)({
+                res,
+                msg: "Email confirmed successfully",
+                status: 200,
+            });
         }
         catch (error) {
             throw error;
@@ -123,7 +129,11 @@ class AuthServices {
                 subject,
                 html,
             });
-            return (0, utils_1.successHandler)({ res, msg: "Email confirmed successfully", status: 200 });
+            return (0, utils_1.successHandler)({
+                res,
+                msg: "Email confirmed successfully",
+                status: 200,
+            });
         }
         catch (error) {
             throw error;
@@ -323,7 +333,11 @@ class AuthServices {
             user.changedCredentialsAt = new Date();
             user.passwordOtp = undefined;
             await user.save();
-            return (0, utils_1.successHandler)({ res, msg: "Password Reset Successfully", status: 200 });
+            return (0, utils_1.successHandler)({
+                res,
+                msg: "Password Reset Successfully",
+                status: 200,
+            });
         }
         catch (error) {
             throw error;

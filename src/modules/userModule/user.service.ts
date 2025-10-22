@@ -246,7 +246,7 @@ class UserServices implements IUserServices {
       if(user.blockList.includes(Types.ObjectId.createFromHexString(to))){
         throw new notFoundError();
       }
-      if (user._id.toString() === to) {
+      if ((user._id as Types.ObjectId).toString() === to) {
         throw new unableToSetFriendRequest();
       }
       let friend;
@@ -421,7 +421,7 @@ class UserServices implements IUserServices {
     if(user.blockList.includes(Types.ObjectId.createFromHexString(to))){
         throw new notFoundError();
     }
-    if (user._id.toString() === to) {
+    if ((user._id as Types.ObjectId).toString() === to) {
       throw new notFoundError();
     }
     let target;

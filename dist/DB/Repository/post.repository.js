@@ -24,6 +24,7 @@ class PostRepository extends db_repository_1.default {
         const users = await this.userRepository.find({
             filter: {
                 _id: { $in: tags },
+                paranoid: true,
             },
             projection: { _id: 1 },
         });
@@ -37,19 +38,22 @@ class PostRepository extends db_repository_1.default {
         }
     };
     findPost = async (postId, user) => {
-        const post = await this.model
-            .findOne({
+        const post = await this.findOne({
             filter: {
                 _id: postId,
                 $or: (0, post_model_2.availabilityFilter)(user),
+                paranoid: true,
             },
-        })
-            .populate("comments");
-        if (!post) {
-            throw new utils_1.notFoundError();
-        }
+        }).then((post) => {
+            if (!post) {
+                throw new utils_1.notFoundError();
+            }
+            post.populate("comments");
+            return post;
+        });
         const createdBy = await this.userRepository.findOne({
             filter: {
+                paranoid: true,
                 _id: post.createdBy,
             },
         });
@@ -62,18 +66,19 @@ class PostRepository extends db_repository_1.default {
         return post;
     };
     findMyPost = async (postId, user, paranoid = true) => {
-        const post = await this.model
-            .findOne({
+        const post = await this.findOne({
             filter: {
                 _id: postId,
                 createdBy: user._id,
+                paranoid,
             },
-            paranoid,
-        })
-            .populate("comments");
-        if (!post) {
-            throw new utils_1.notFoundError();
-        }
+        }).then((post) => {
+            if (!post) {
+                throw new utils_1.notFoundError();
+            }
+            post.populate("comments");
+            return post;
+        });
         return post;
     };
     likeUnlikePost = async ({ postId, action, user, }) => {
@@ -100,7 +105,7 @@ class PostRepository extends db_repository_1.default {
         }
         return post;
     };
-    findMyPostAndFreezeUnfreezeDelete = async ({ postId, user, data, paranoid = true, action, }) => {
+    findMyPostAndFreezeUnfreezeDelete = async ({ postId, user, data, paranoid = false, action, }) => {
         const post = await this.findMyPost(postId, user, paranoid);
         if (action === "freeze" || action === "active") {
             if (data) {
@@ -147,7 +152,7 @@ class PostRepository extends db_repository_1.default {
                 attachments: {
                     $setUnion: [
                         {
-                            $setDifference: ["$attachments", (data.removedAttachments || [])],
+                            $setDifference: ["$attachments", data.removedAttachments || []],
                         },
                         data.attachmentsLink || [],
                     ],
@@ -155,7 +160,7 @@ class PostRepository extends db_repository_1.default {
                 tags: {
                     $setUnion: [
                         {
-                            $setDifference: ["$tags", (data.removedTags || [])],
+                            $setDifference: ["$tags", data.removedTags || []],
                         },
                         data.newTags?.map((tag) => {
                             return new mongoose_1.Types.ObjectId(tag);
