@@ -31,6 +31,7 @@ const usersSchema = new Schema<IUser>({
   tempEmail: {
     type: String,
     unique: true,
+    sparse: true,
   },
   password: {
     type: String,

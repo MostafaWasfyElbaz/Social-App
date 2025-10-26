@@ -78,13 +78,13 @@ class CommentRepository extends db_repository_1.default {
         const comment = await this.findOne({
             filter: {
                 _id: commentId,
-                ...(type === "my" ? { createdBy: user._id } : {}),
+                ...(type === "my" ? { createdBy: user._id, paranoid: false } : { paranoid: true }),
             },
         });
         if (!comment) {
             throw new utils_1.notFoundError();
         }
-        const post = await postRepo.findPost(comment.postId, user);
+        const post = type === "all" ? await postRepo.findPost(comment.postId, user) : await postRepo.findMyPost(comment.postId, user);
         if (!post) {
             throw new utils_1.notFoundError();
         }

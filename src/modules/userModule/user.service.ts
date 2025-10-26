@@ -243,7 +243,7 @@ class UserServices implements IUserServices {
     try {
       const user = res.locals.user as HydratedDocument<IUser>;
       const { to }: sendFriendRequestDTO = req.params as sendFriendRequestDTO;
-      if(user.blockList.includes(Types.ObjectId.createFromHexString(to))){
+      if (user.blockList.includes(Types.ObjectId.createFromHexString(to))) {
         throw new notFoundError();
       }
       if ((user._id as Types.ObjectId).toString() === to) {
@@ -418,8 +418,8 @@ class UserServices implements IUserServices {
   ): Promise<Response> => {
     const user: HydratedDocument<IUser> = res.locals.user;
     const { to }: blockUserDTO = req.params as blockUserDTO;
-    if(user.blockList.includes(Types.ObjectId.createFromHexString(to))){
-        throw new notFoundError();
+    if (user.blockList.includes(Types.ObjectId.createFromHexString(to))) {
+      throw new notFoundError();
     }
     if ((user._id as Types.ObjectId).toString() === to) {
       throw new notFoundError();
@@ -447,6 +447,27 @@ class UserServices implements IUserServices {
       res,
       msg: "User blocked successfully",
       status: 200,
+    });
+  };
+
+  getUserProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response> => {
+    const User: HydratedDocument<IUser> = res.locals.user;
+    const user = await this.userRepository.findOne({
+      filter: { _id: User._id },
+      options: { populate: "friends" },
+    });
+
+    if (!user) {
+      throw new notFoundError();
+    }
+
+    return successHandler({
+      res,
+      data: { user },
     });
   };
 }

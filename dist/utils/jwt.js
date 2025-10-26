@@ -15,20 +15,20 @@ const generateToken = ({ payload, }) => {
 exports.generateToken = generateToken;
 const generateAccessToken = ({ payload, jwtid, }) => {
     return jsonwebtoken_1.default.sign(payload, process.env.ACCESS_SIGNITURE, {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRATION,
+        expiresIn: "12000 S",
         jwtid,
     });
 };
 exports.generateAccessToken = generateAccessToken;
 const generateTempToken = ({ payload, }) => {
     return jsonwebtoken_1.default.sign(payload, process.env.TEMP_SIGNITURE, {
-        expiresIn: process.env.TEMP_TOKEN_EXPIRATION,
+        expiresIn: "300 S",
     });
 };
 exports.generateTempToken = generateTempToken;
 const generateRefreshToken = ({ payload, jwtid, }) => {
     return jsonwebtoken_1.default.sign(payload, process.env.REFRESH_SIGNITURE, {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
+        expiresIn: "7 D",
         jwtid,
     });
 };

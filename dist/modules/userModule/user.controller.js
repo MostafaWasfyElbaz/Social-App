@@ -9,6 +9,7 @@ const index_1 = require("../../utils/index");
 const index_2 = require("../../middleware/index");
 const middleware_1 = require("../../middleware");
 const user_validation_1 = require("./user.validation");
+const chat_controller_1 = __importDefault(require("../chatModule/chat.controller"));
 const router = (0, express_1.Router)();
 const userServices = new user_service_1.default();
 const routes = {
@@ -25,7 +26,10 @@ const routes = {
     deleteProfileImage: "/uploads/delete-profile-image/*path",
     deleteCoverImages: "/uploads/delete-cover-images/*path",
     updateUserBasicInfo: "/update-user-basic-info",
+    getUserProfile: "/profile",
+    getChat: "/:userId/chat",
 };
+router.use(routes.getChat, chat_controller_1.default);
 router.post(routes.sendFriendRequest, (0, index_2.auth)(), (0, middleware_1.validationMiddleware)(user_validation_1.sendFriendRequestSchema), userServices.sendFriendRequest);
 router.patch(routes.acceptFriendRequest, (0, index_2.auth)(), (0, middleware_1.validationMiddleware)(user_validation_1.acceptFriendRequestSchema), userServices.acceptFriendRequest);
 router.patch(routes.deleteFriendRequest, (0, index_2.auth)(), (0, middleware_1.validationMiddleware)(user_validation_1.deleteFriendRequestSchema), userServices.deleteFriendRequest);
@@ -37,6 +41,7 @@ router.patch(routes.uploadFileWithPresignedUrl, (0, index_2.auth)(), userService
 router.patch(routes.updateUserBasicInfo, (0, index_2.auth)(), userServices.updateUserBasicInfo);
 router.get(routes.getFilesOrDownload, userServices.getFilesOrDownload);
 router.get(routes.getFilesOrDownloadPreSignedUrl, userServices.getFilesOrDownloadPreSignedUrl);
+router.get(routes.getUserProfile, (0, index_2.auth)(), userServices.getUserProfile);
 router.delete(routes.deleteProfileImage, (0, index_2.auth)(), userServices.deleteProfileImage);
 router.delete(routes.deleteCoverImages, (0, index_2.auth)(), userServices.deleteCoverImages);
 exports.default = router;

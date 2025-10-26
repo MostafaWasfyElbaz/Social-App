@@ -3,7 +3,6 @@ import { IComment, ICommentRepo, IUser } from "../../common";
 import DBRepository from "./db.repository";
 import { notFoundError } from "../../utils";
 import { Comment } from "../models/comment.model";
-import { availabilityFilter } from "../models/post.model";
 
 export default class CommentRepository
   extends DBRepository<IComment>
@@ -62,13 +61,13 @@ export default class CommentRepository
     const comment = await this.findOne({
       filter: {
         _id: commentId,
-        ...(type === "my" ? { createdBy: user._id } : {}),
+        ...(type === "my" ? { createdBy: user._id, paranoid: false } : {paranoid: true}),
       },
     });
     if (!comment) {
       throw new notFoundError();
     }
-    const post = await postRepo.findPost(comment.postId, user);
+    const post = type === "all" ? await postRepo.findPost(comment.postId, user) : await postRepo.findMyPost(comment.postId, user);
     if (!post) {
       throw new notFoundError();
     }

@@ -31,7 +31,6 @@ router.post(routes._2FA, (0, middleware_1.auth)({ tokenType: common_1.TokenType.
 router.patch(routes.confirmEmail, (0, middleware_1.validationMiddleware)(auth_validation_1.confirmEmailSchema), authServices.confirmEmail);
 router.patch(routes.resendEmailOtp, (0, middleware_1.validationMiddleware)(auth_validation_1.resendEmailOtpSchema), authServices.resendEmailOtp);
 router.patch(routes.resendUpdateEmailOtp, (0, middleware_1.validationMiddleware)(auth_validation_1.resendUpdateEmailOtpSchema), authServices.resendUpdateEmailOtp);
-router.patch(routes.resendPasswordOtp, (0, middleware_1.validationMiddleware)(auth_validation_1.resendPasswordOtpSchema), authServices.resendPasswordOtp);
 router.patch(routes.forgotPassword, (0, middleware_1.validationMiddleware)(auth_validation_1.forgotPasswordSchema), authServices.forgotPassword);
 router.patch(routes.resetPassword, (0, middleware_1.validationMiddleware)(auth_validation_1.resetPasswordSchema), authServices.resetPassword);
 router.patch(routes.updateEmail, (0, middleware_1.auth)(), (0, middleware_1.validationMiddleware)(auth_validation_1.updateEmailSchema), authServices.updateEmail);

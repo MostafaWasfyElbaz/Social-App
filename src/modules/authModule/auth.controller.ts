@@ -11,7 +11,6 @@ import {
   updateEmailSchema,
   forgotPasswordSchema,
   resendUpdateEmailOtpSchema,
-  resendPasswordOtpSchema,
   _2FASchema,
 } from "./auth.validation";
 import { IAuthServices, TokenType } from "../../common";
@@ -66,11 +65,6 @@ router.patch(
   routes.resendUpdateEmailOtp,
   validationMiddleware(resendUpdateEmailOtpSchema),
   authServices.resendUpdateEmailOtp
-);
-router.patch(
-  routes.resendPasswordOtp,
-  validationMiddleware(resendPasswordOtpSchema),
-  authServices.resendPasswordOtp
 );
 router.patch(
   routes.forgotPassword,

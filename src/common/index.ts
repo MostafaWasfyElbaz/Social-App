@@ -19,3 +19,12 @@ export * from "./interfaces/comment/ICommentRepo";
 export * from "./interfaces/comment/ICommentServices";
 export * from "./interfaces/user/IFriendRequest";
 export * from "./interfaces/user/IFriendRequestRepo";
+export * from "./interfaces/socket/IAuthSocket";
+export * from "./interfaces/chat/IChatRestServices";
+export * from "./interfaces/chat/IChatSocketServices";
+export * from "./interfaces/chat/IChatEvents";
+export * from "./interfaces/chat/IChatGateway";
+export * from "./interfaces/chat/IChat";
+export * from "./interfaces/chat/IMessage";
+export * from "./interfaces/chat/IChatRepo";
+

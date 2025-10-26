@@ -72,7 +72,7 @@ export default class PostRepository
   findMyPost = async (
     postId: Types.ObjectId,
     user: HydratedDocument<IUser>,
-    paranoid = true
+    paranoid = false
   ): Promise<HydratedDocument<IPost>> => {
     const post = await this.findOne({
       filter: {

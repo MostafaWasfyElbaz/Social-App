@@ -41,22 +41,19 @@ export interface IUserServices {
     res: Response,
     next: NextFunction
   ): Promise<Response>;
-  unfriend(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response>;
+  unfriend(req: Request, res: Response, next: NextFunction): Promise<Response>;
   acceptFriendRequest(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response>;
-  blockUser(
+  blockUser(req: Request, res: Response, next: NextFunction): Promise<Response>;
+  rejectFriendRequest(
     req: Request,
     res: Response,
     next: NextFunction
   ): Promise<Response>;
-  rejectFriendRequest(
+  getUserProfile(
     req: Request,
     res: Response,
     next: NextFunction

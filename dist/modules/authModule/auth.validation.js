@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports._2FASchema = exports.confirmEmailChangeSchema = exports.updateEmailSchema = exports.resetPasswordSchema = exports.forgotPasswordSchema = exports.loginSchema = exports.resendEmailOtpSchema = exports.confirmEmailSchema = exports.signupSchema = void 0;
+exports.resendUpdateEmailOtpSchema = exports._2FASchema = exports.confirmEmailChangeSchema = exports.updateEmailSchema = exports.resetPasswordSchema = exports.forgotPasswordSchema = exports.loginSchema = exports.resendEmailOtpSchema = exports.confirmEmailSchema = exports.signupSchema = void 0;
 const zod_1 = require("zod");
 const common_1 = require("../../common");
 exports.signupSchema = zod_1.z
@@ -63,3 +63,4 @@ exports.confirmEmailChangeSchema = zod_1.z.object({
 exports._2FASchema = zod_1.z.object({
     otp: zod_1.z.string().min(6, "OTP must be at least 6 characters long"),
 });
+exports.resendUpdateEmailOtpSchema = zod_1.z.object({});

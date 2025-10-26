@@ -32,6 +32,7 @@ const usersSchema = new mongoose_1.Schema({
     tempEmail: {
         type: String,
         unique: true,
+        sparse: true,
     },
     password: {
         type: String,

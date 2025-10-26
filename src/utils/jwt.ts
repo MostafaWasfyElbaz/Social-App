@@ -21,7 +21,7 @@ export const generateAccessToken = ({
   jwtid: string;
 }): string => {
   return jwt.sign(payload, process.env.ACCESS_SIGNITURE as string, {
-    expiresIn: process.env.ACCESS_TOKEN_EXPIRATION as string,
+    expiresIn: "12000 S",
     jwtid,
   });
 };
@@ -32,7 +32,7 @@ export const generateTempToken = ({
   payload: string | object;
 }): string => {
   return jwt.sign(payload, process.env.TEMP_SIGNITURE as string, {
-    expiresIn: process.env.TEMP_TOKEN_EXPIRATION as string,
+    expiresIn: "300 S",
   });
 };
 
@@ -44,7 +44,7 @@ export const generateRefreshToken = ({
   jwtid: string;
 }): string => {
   return jwt.sign(payload, process.env.REFRESH_SIGNITURE as string, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRATION as string,
+    expiresIn: "7 D",
     jwtid,
   });
 };

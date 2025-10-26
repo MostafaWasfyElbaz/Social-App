@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import { HydratedDocument } from "mongoose";
+import { IUser } from "../..";
 
 export interface IAuthServices {
   signup(req: Request, res: Response, next: NextFunction): Promise<Response>;
@@ -43,10 +45,6 @@ export interface IAuthServices {
     res: Response,
     next: NextFunction
   ): Promise<Response>;
-  resendPasswordOtp(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response>;
+  rateLimit(model: HydratedDocument<IUser>, schema: any): Promise<void>;
   _2FA(req: Request, res: Response, next: NextFunction): Promise<Response>;
 }

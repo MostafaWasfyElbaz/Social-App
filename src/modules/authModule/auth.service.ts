@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { IAuthServices, Events, Gender, TokenType, IUser } from "../../common";
+import { IAuthServices, Events, TokenType, IUser, Gender } from "../../common";
 import UserRepository from "../../DB/Repository/user.repository";
 import {
   generateOTP,
@@ -36,6 +36,31 @@ import { HydratedDocument } from "mongoose";
 
 class AuthServices implements IAuthServices {
   constructor(private userRepo = new UserRepository()) {}
+
+  rateLimit = async (
+    model: HydratedDocument<IUser>,
+    schema: any
+  ): Promise<void> => {
+    if (
+      schema.banExp &&
+      schema.banExp.getTime() <= new Date().getTime() &&
+      schema.count >= 5
+    ) {
+      schema.count = 0;
+      schema.banExp = undefined;
+    }
+    if (schema && schema.count >= 5) {
+      if (!schema.banExp) {
+        schema.banExp = new Date(Date.now() + Number(process.env.ATTEMPTS_EXP));
+        await model.save();
+      }
+      throw new tooManyRequestsError();
+    }
+    if (schema) {
+      schema.count++;
+      await model.save();
+    }
+  };
 
   signup = async (
     req: Request,
@@ -87,32 +112,15 @@ class AuthServices implements IAuthServices {
       if (!user) {
         throw new notFoundError();
       }
-      if (user?.isConfirmed || !user.emailOtp) {
+      if (user?.isConfirmed) {
         throw new userAlreadyConfirmedError();
       }
-      if (
-        user.emailOtp.attempts?.banExp &&
-        user.emailOtp.attempts.banExp.getTime() <= new Date().getTime() &&
-        user.emailOtp.attempts.count >= 5
-      ) {
-        user.emailOtp.attempts.count = 0;
-        user.emailOtp.attempts.banExp = undefined;
+      if (!user.emailOtp) {
+        throw new tryResendOtp();
       }
-      if (user.emailOtp.attempts && user.emailOtp.attempts.count >= 5) {
-        if (!user.emailOtp.attempts.banExp) {
-          user.emailOtp.attempts.banExp = new Date(
-            Date.now() + Number(process.env.ATTEMPTS_EXP)
-          );
-          await user.save();
-        }
-        throw new tooManyRequestsError();
-      }
+      await this.rateLimit(user, user.emailOtp.attempts);
       if (user.emailOtp.expiresAt <= new Date()) {
         throw new otpExpiredError();
-      }
-      if (user.emailOtp.attempts) {
-        user.emailOtp.attempts.count++;
-        await user.save();
       }
       const isMatch = await compareHash(otp, user.emailOtp.otp);
       if (!isMatch) {
@@ -142,33 +150,13 @@ class AuthServices implements IAuthServices {
       if (!user) {
         throw new notFoundError();
       }
-      if (user?.isConfirmed || !user.emailOtp) {
+      if (user?.isConfirmed) {
         throw new userAlreadyConfirmedError();
       }
-      if (
-        user.emailOtp.request?.banExp &&
-        user.emailOtp.request.banExp.getTime() <= new Date().getTime() &&
-        user.emailOtp.request.count >= 5
-      ) {
-        user.emailOtp.request.count = 0;
-        user.emailOtp.request.banExp = undefined;
-      }
-      if (user.emailOtp.request && user.emailOtp.request.count >= 5) {
-        if (!user.emailOtp.request.banExp) {
-          user.emailOtp.request.banExp = new Date(
-            Date.now() + Number(process.env.ATTEMPTS_EXP)
-          );
-          await user.save();
-        }
-        throw new tooManyRequestsError();
-      }
-      if (user.emailOtp.request) {
-        user.emailOtp.request.count++;
-        await user.save();
-      }
-      if (user.emailOtp.expiresAt >= new Date()) {
+      if (user.emailOtp && user.emailOtp.expiresAt >= new Date()) {
         throw new otpNotExpiredError();
       }
+      await this.rateLimit(user, (user.emailOtp as any).request);
       const confirmEmailOtp = generateOTP();
       const subject: string = "Confirm Email";
       const html: string = template(
@@ -259,29 +247,9 @@ class AuthServices implements IAuthServices {
       if (!user.emailOtp) {
         throw new tryResendOtp();
       }
-      if (
-        user.emailOtp.attempts?.banExp &&
-        user.emailOtp.attempts.banExp.getTime() <= new Date().getTime() &&
-        user.emailOtp.attempts.count >= 5
-      ) {
-        user.emailOtp.attempts.count = 0;
-        user.emailOtp.attempts.banExp = undefined;
-      }
-      if (user.emailOtp.attempts && user.emailOtp.attempts.count >= 5) {
-        if (!user.emailOtp.attempts.banExp) {
-          user.emailOtp.attempts.banExp = new Date(
-            Date.now() + Number(process.env.ATTEMPTS_EXP)
-          );
-          await user.save();
-        }
-        throw new tooManyRequestsError();
-      }
+      await this.rateLimit(user, user.emailOtp.attempts);
       if (user.emailOtp.expiresAt <= new Date()) {
         throw new otpExpiredError();
-      }
-      if (user.emailOtp.attempts) {
-        user.emailOtp.attempts.count++;
-        await user.save();
       }
       const isMatch = await compareHash(otp, user.emailOtp.otp);
       if (!isMatch) {
@@ -337,9 +305,6 @@ class AuthServices implements IAuthServices {
     try {
       const { email }: forgotPasswordDTO = req.body;
       const user = await this.userRepo.findUserByEmail(email);
-      if (user?.passwordOtp) {
-        throw new tryResendOtp();
-      }
       if (!user) {
         throw new notFoundError();
       }
@@ -348,6 +313,9 @@ class AuthServices implements IAuthServices {
       }
       if (user.passwordOtp && user.passwordOtp.expiresAt >= new Date()) {
         throw new otpNotExpiredError();
+      }
+      if (user.passwordOtp) {
+        await this.rateLimit(user, user.passwordOtp.request);
       }
       const forgetPasswordlOtp = generateOTP();
       const subject: string = "Reset Password";
@@ -388,31 +356,11 @@ class AuthServices implements IAuthServices {
         throw new notFoundError();
       }
       if (!user.passwordOtp) {
-        throw new invalidCredentialsError();
+        throw new tryResendOtp();
       }
+      await this.rateLimit(user, user.passwordOtp.attempts);
       if (user.passwordOtp && user.passwordOtp.expiresAt <= new Date()) {
         throw new otpExpiredError();
-      }
-      if (
-        user.passwordOtp.attempts?.banExp &&
-        user.passwordOtp.attempts.banExp.getTime() <= new Date().getTime() &&
-        user.passwordOtp.attempts.count >= 5
-      ) {
-        user.passwordOtp.attempts.count = 0;
-        user.passwordOtp.attempts.banExp = undefined;
-      }
-      if (user.passwordOtp.attempts && user.passwordOtp.attempts.count >= 5) {
-        if (!user.passwordOtp.attempts.banExp) {
-          user.passwordOtp.attempts.banExp = new Date(
-            Date.now() + Number(process.env.ATTEMPTS_EXP)
-          );
-          await user.save();
-        }
-        throw new tooManyRequestsError();
-      }
-      if (user.passwordOtp.attempts) {
-        user.passwordOtp.attempts.count++;
-        await user.save();
       }
       const isMatch = await compareHash(otp, user.passwordOtp.otp);
       if (!isMatch) {
@@ -464,34 +412,14 @@ class AuthServices implements IAuthServices {
       const user: HydratedDocument<IUser> = res.locals.user;
       const { oldOtp, newOtp }: confirmEmailChangeDTO = req.body;
       if (!user.emailOtp || !user.tempEmailOtp) {
-        throw new invalidCredentialsError();
+        throw new tryResendOtp();
       }
-      if (user.emailOtp.expiresAt <= new Date()) {
-        throw new otpExpiredError();
-      }
+      await this.rateLimit(user, user.tempEmailOtp.attempts);
       if (
-        user.tempEmailOtp.attempts?.banExp &&
-        user.tempEmailOtp.attempts.banExp.getTime() <= new Date().getTime() &&
-        user.tempEmailOtp.attempts.count >= 5
+        user.emailOtp.expiresAt <= new Date() ||
+        user.tempEmailOtp.expiresAt <= new Date()
       ) {
-        user.tempEmailOtp.attempts.count = 0;
-        user.tempEmailOtp.attempts.banExp = undefined;
-      }
-      if (user.tempEmailOtp.attempts && user.tempEmailOtp.attempts.count >= 5) {
-        if (!user.tempEmailOtp.attempts.banExp) {
-          user.tempEmailOtp.attempts.banExp = new Date(
-            Date.now() + Number(process.env.ATTEMPTS_EXP)
-          );
-          await user.save();
-        }
-        throw new tooManyRequestsError();
-      }
-      if (user.tempEmailOtp.expiresAt <= new Date()) {
         throw new otpExpiredError();
-      }
-      if (user.tempEmailOtp.attempts) {
-        user.tempEmailOtp.attempts.count++;
-        await user.save();
       }
       const old = await compareHash(oldOtp, user.emailOtp?.otp);
       const neu = await compareHash(newOtp, user.tempEmailOtp?.otp);
@@ -512,18 +440,6 @@ class AuthServices implements IAuthServices {
     } catch (error) {
       throw error;
     }
-  };
-
-  resendPasswordOtp = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response> => {
-    return successHandler({
-      res,
-      msg: "Password Otp Resent Successfully",
-      status: 200,
-    });
   };
 
   resendUpdateEmailOtp = async (

@@ -382,5 +382,19 @@ class UserServices {
             status: 200,
         });
     };
+    getUserProfile = async (req, res, next) => {
+        const User = res.locals.user;
+        const user = await this.userRepository.findOne({
+            filter: { _id: User._id },
+            options: { populate: "friends" },
+        });
+        if (!user) {
+            throw new utils_1.notFoundError();
+        }
+        return (0, utils_1.successHandler)({
+            res,
+            data: { user },
+        });
+    };
 }
 exports.default = UserServices;

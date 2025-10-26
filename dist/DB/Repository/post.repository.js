@@ -65,7 +65,7 @@ class PostRepository extends db_repository_1.default {
         }
         return post;
     };
-    findMyPost = async (postId, user, paranoid = true) => {
+    findMyPost = async (postId, user, paranoid = false) => {
         const post = await this.findOne({
             filter: {
                 _id: postId,
