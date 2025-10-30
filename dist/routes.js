@@ -41,7 +41,9 @@ const routes = {
     auth: "/auth",
     post: "/post",
     comment: "/comment",
+    chat: "/chat",
 };
+baseRouter.use(routes.chat, modules.chatRouter);
 baseRouter.use(routes.user, modules.userRouter);
 baseRouter.use(routes.auth, modules.authRouter);
 baseRouter.use(routes.post, modules.postRouter);

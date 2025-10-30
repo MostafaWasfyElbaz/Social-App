@@ -12,6 +12,8 @@ class ChatGateway {
     }
     register = async (socket) => {
         this.chatEvents.sendMessage(socket);
+        this.chatEvents.joinRoom(socket);
+        this.chatEvents.sendGroupMessage(socket);
     };
 }
 exports.chatGateway = new ChatGateway();

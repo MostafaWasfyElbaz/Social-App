@@ -23,5 +23,28 @@ class ChatEvents {
             this.chatSocketService.sendMessage(socket, result.data);
         });
     };
+    joinRoom = async (socket) => {
+        socket.on("join_room", async (data) => {
+            try {
+                this.chatSocketService.joinRoom(socket, data.roomId);
+            }
+            catch (error) {
+                socket.emit("customError", error);
+            }
+        });
+    };
+    sendGroupMessage = async (socket) => {
+        socket.on("sendGroupMessage", async (data) => {
+            try {
+                this.chatSocketService.sendGroupMessage(socket, {
+                    groupId: data.groupId,
+                    content: data.content,
+                });
+            }
+            catch (error) {
+                socket.emit("customError", error);
+            }
+        });
+    };
 }
 exports.default = ChatEvents;

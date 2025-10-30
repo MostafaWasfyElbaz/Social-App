@@ -9,6 +9,7 @@ import {
 } from "../../utils";
 import { HydratedDocument, Types } from "mongoose";
 import FriendRequestRepository from "../../DB/Repository/friendRequest.repository";
+import ChatRepository from "../../DB/Repository/chat.repository";
 import UserRepository from "../../DB/Repository/user.repository";
 import {
   acceptFriendRequestDTO,
@@ -23,6 +24,7 @@ class UserServices implements IUserServices {
   constructor(
     private s3Services = new S3Services(),
     private friendRequestRepository = new FriendRequestRepository(),
+    private chatRepository = new ChatRepository(),
     private userRepository = new UserRepository()
   ) {}
   uploadProfilePicture = async (
@@ -464,10 +466,19 @@ class UserServices implements IUserServices {
     if (!user) {
       throw new notFoundError();
     }
-
+    const groups = await this.chatRepository.find({
+      filter: {
+        participants: {
+          $in: [User._id],
+        },
+        groupName: {
+          $exists: true,
+        },
+      },
+    });
     return successHandler({
       res,
-      data: { user },
+      data: { user, groups },
     });
   };
 }

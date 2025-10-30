@@ -44,5 +44,60 @@ class ChatSocketService {
             socket.emit("customError", error);
         }
     };
+    joinRoom = async (socket, roomId) => {
+        try {
+            const user = socket.user;
+            if (!user) {
+                throw new utils_1.notFoundError();
+            }
+            const group = await this.chatRepo.joinRoom({
+                roomId: roomId,
+                createdBy: user._id,
+            });
+            socket.join(group.roomId);
+        }
+        catch (error) {
+            socket.emit("customError", error);
+        }
+    };
+    sendGroupMessage = async (socket, data) => {
+        try {
+            const user = socket.user;
+            if (!user) {
+                throw new utils_1.notFoundError();
+            }
+            const group = await this.chatRepo.findOne({
+                filter: {
+                    _id: data.groupId,
+                    groupName: {
+                        $exists: true,
+                    },
+                    participants: {
+                        $in: [user._id],
+                    },
+                },
+            });
+            if (!group) {
+                throw new utils_1.notFoundError();
+            }
+            await group.updateOne({
+                messages: {
+                    $push: {
+                        content: data.content,
+                        createdBy: user._id,
+                    },
+                },
+            });
+            socket.emit("successMessage", data.content);
+            socket.to(group.roomId).emit("newGroupMessage", {
+                content: data.content,
+                from: user,
+                groupId: data.groupId,
+            });
+        }
+        catch (error) {
+            socket.emit("customError", error);
+        }
+    };
 }
 exports.default = ChatSocketService;

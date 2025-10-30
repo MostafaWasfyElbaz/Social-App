@@ -6,7 +6,7 @@ export interface IChat {
   messages: IMessage[];
   groupName?: string;
   groupImage?: string;
-  groupId?: string;
+  roomId?: string;
   createdBy: Types.ObjectId;
   updatedAt: Date;
   createdAt: Date;

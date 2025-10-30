@@ -34,7 +34,65 @@ export default class ChatSocketService implements IChatSocketServices {
       socket.emit("successMessage", data.content);
       socket
         .to(connectedUsers.get(receiverId.toString()) || [])
-        .emit("newMessage", { content: data.content, from: {id:user._id} });
+        .emit("newMessage", { content: data.content, from: { id: user._id } });
+    } catch (error) {
+      socket.emit("customError", error);
+    }
+  };
+
+  joinRoom = async (socket: IAuthSocket, roomId: string): Promise<void> => {
+    try {
+      const user = socket.user;
+      if (!user) {
+        throw new notFoundError();
+      }
+      const group = await this.chatRepo.joinRoom({
+        roomId: roomId as unknown as Types.ObjectId,
+        createdBy: user._id as unknown as Types.ObjectId,
+      });
+      socket.join(group.roomId as string);
+    } catch (error) {
+      socket.emit("customError", error);
+    }
+  };
+
+  sendGroupMessage = async (
+    socket: IAuthSocket,
+    data: { groupId: string; content: string }
+  ): Promise<void> => {
+    try {
+      const user = socket.user;
+      if (!user) {
+        throw new notFoundError();
+      }
+      const group = await this.chatRepo.findOne({
+        filter: {
+          _id: data.groupId,
+          groupName: {
+            $exists: true,
+          },
+          participants: {
+            $in: [user._id],
+          },
+        },
+      });
+      if (!group) {
+        throw new notFoundError();
+      }
+      await group.updateOne({
+        messages: {
+          $push: {
+            content: data.content,
+            createdBy: user._id,
+          },
+        },
+      });
+      socket.emit("successMessage", data.content);
+      socket.to(group.roomId as string).emit("newGroupMessage", {
+        content: data.content,
+        from: user,
+        groupId: data.groupId,
+      });
     } catch (error) {
       socket.emit("customError", error);
     }

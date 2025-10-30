@@ -22,5 +22,35 @@ class ChatRestServices {
             status: 200,
         });
     };
+    createGroup = async (req, res) => {
+        const user = res.locals.user;
+        const { groupName, participants } = req.body;
+        const group = await this.chatRepo.createGroup({
+            groupName,
+            participants,
+            createdBy: user._id,
+        });
+        return (0, utils_1.successHandler)({
+            res,
+            msg: "Group created successfully",
+            data: group,
+            status: 200,
+        });
+    };
+    getGroupChat = async (req, res) => {
+        const createdBy = res.locals.user;
+        const { groupId } = req.params
+            .groupId;
+        const groupChat = await this.chatRepo.getGroupChat({
+            groupId: groupId,
+            createdBy: createdBy._id,
+        });
+        return (0, utils_1.successHandler)({
+            res,
+            msg: "Group chat fetched successfully",
+            data: groupChat,
+            status: 200,
+        });
+    };
 }
 exports.default = ChatRestServices;

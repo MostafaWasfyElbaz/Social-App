@@ -6,14 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../../utils");
 const mongoose_1 = require("mongoose");
 const friendRequest_repository_1 = __importDefault(require("../../DB/Repository/friendRequest.repository"));
+const chat_repository_1 = __importDefault(require("../../DB/Repository/chat.repository"));
 const user_repository_1 = __importDefault(require("../../DB/Repository/user.repository"));
 class UserServices {
     s3Services;
     friendRequestRepository;
+    chatRepository;
     userRepository;
-    constructor(s3Services = new utils_1.S3Services(), friendRequestRepository = new friendRequest_repository_1.default(), userRepository = new user_repository_1.default()) {
+    constructor(s3Services = new utils_1.S3Services(), friendRequestRepository = new friendRequest_repository_1.default(), chatRepository = new chat_repository_1.default(), userRepository = new user_repository_1.default()) {
         this.s3Services = s3Services;
         this.friendRequestRepository = friendRequestRepository;
+        this.chatRepository = chatRepository;
         this.userRepository = userRepository;
     }
     uploadProfilePicture = async (req, res, next) => {
@@ -391,9 +394,19 @@ class UserServices {
         if (!user) {
             throw new utils_1.notFoundError();
         }
+        const groups = await this.chatRepository.find({
+            filter: {
+                participants: {
+                    $in: [User._id],
+                },
+                groupName: {
+                    $exists: true,
+                },
+            },
+        });
         return (0, utils_1.successHandler)({
             res,
-            data: { user },
+            data: { user, groups },
         });
     };
 }

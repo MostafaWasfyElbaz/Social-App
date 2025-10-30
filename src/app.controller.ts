@@ -30,8 +30,8 @@ export const bootstrap = async (): Promise<void> => {
         },
       },
     }),
-  })
-  app.use("/graphql", createHandler({schema}))
+  });
+  app.use("/graphql", createHandler({ schema }));
   app.use("/{*dummy}", (req, res) => {
     res.status(404).json({
       message: "Page not found",
@@ -55,5 +55,5 @@ export const bootstrap = async (): Promise<void> => {
     console.log(`Server is running on port ${process.env.SERVER_PORT}`);
   });
 
-await initialization(httpServer);
+  await initialization(httpServer);
 };

@@ -21,7 +21,7 @@ const chatSchema = new mongoose_1.Schema({
     messages: [messageSchema],
     groupName: String,
     groupImage: String,
-    groupId: String,
+    roomId: String,
     createdBy: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",

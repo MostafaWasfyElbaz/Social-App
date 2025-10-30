@@ -25,7 +25,7 @@ const chatSchema = new Schema<IChat>(
     messages: [messageSchema],
     groupName: String,
     groupImage: String,
-    groupId: String,
+    roomId: String,
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
