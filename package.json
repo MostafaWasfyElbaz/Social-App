@@ -11,6 +11,7 @@
     "deploy": "git add . && git commit -m 'update' && git push origin main"
   },
   "devDependencies": {
+    "@express-rate-limit/tsconfig": "^1.0.2",
     "@types/bcrypt": "^6.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",

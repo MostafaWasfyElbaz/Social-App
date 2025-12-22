@@ -9,7 +9,7 @@ $("#login").click(() => {
   };
   axios({
     method: "post",
-    url: `${baseURL}/users/login`,
+    url: `${baseURL}/user/login`,
     data: data,
     headers: { "Content-Type": "application/json; charset=UTF-8" },
   })
