@@ -9,16 +9,27 @@ import cors from "cors";
 import { initialization } from "./modules/gateway/gateway";
 import { GraphQLSchema, GraphQLObjectType, GraphQLString } from "graphql";
 import { createHandler } from "graphql-http/lib/use/express";
+import helmet from "helmet";
+import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
+
 dotenv.config({
   path: path.resolve("./src/config/.env"),
 });
 
-const app = express();
+const limitter: RateLimitRequestHandler = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 1000,
+  message: {
+    status: 429,
+    message:
+      "Too many requests from this IP, please try again after 15 minutes",
+  },
+});
 
 export const bootstrap = async (): Promise<void> => {
-  app.use(cors());
+  const app = express();
+  app.use(cors(), express.json(), helmet());
   await DBConnection();
-  app.use(express.json());
   app.use("/api/v1", baseRouter);
   const schema = new GraphQLSchema({
     query: new GraphQLObjectType({
