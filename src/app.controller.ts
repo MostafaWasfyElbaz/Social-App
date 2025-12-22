@@ -10,13 +10,13 @@ import { initialization } from "./modules/gateway/gateway";
 import { GraphQLSchema, GraphQLObjectType, GraphQLString } from "graphql";
 import { createHandler } from "graphql-http/lib/use/express";
 import helmet from "helmet";
-import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
+import rateLimit from "express-rate-limit";
 
 dotenv.config({
   path: path.resolve("./src/config/.env"),
 });
 
-const limitter: RateLimitRequestHandler = rateLimit({
+const limitter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 1000,
   message: {
