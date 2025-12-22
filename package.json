@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "node --watch ./dist/index.js",
+    "start": "node --watch ./dist/index.js"
   },
   "devDependencies": {
     "@express-rate-limit/tsconfig": "^1.0.2",
