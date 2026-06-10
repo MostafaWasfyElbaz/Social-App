@@ -248,6 +248,50 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
+
+  /user/{userId}/chat:
+    get:
+      tags: [Chat]
+      summary: Get chat for a specific user context
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Chats list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+    post:
+      tags: [Chat]
+      summary: Create a group chat in a user context
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupRequest"
+      responses:
+        "200":
+          description: Group created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
         "400":
           description: Validation/Error
           content:
@@ -268,6 +312,31 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/{userId}/chat/group/{groupId}:
+    get:
+      tags: [Chat]
+      summary: Get a group chat in a user context
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: groupId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Group chat
           content:
             application/json:
               schema:
