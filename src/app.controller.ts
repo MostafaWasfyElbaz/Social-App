@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import path from "path";
 import baseRouter from "./routes";
+import setupSwagger from "./swagger";
 import { IError } from "./common/index";
 import { NextFunction, Request, Response } from "express";
 import { DBConnection } from "./DB/DBConnection";
@@ -28,6 +29,7 @@ const limitter = rateLimit({
 
 export const bootstrap = async (): Promise<void> => {
   const app = express();
+  setupSwagger(app);
   app.use(cors(), express.json(), helmet());
   await DBConnection();
   app.use("/api/v1", baseRouter);
@@ -53,14 +55,14 @@ export const bootstrap = async (): Promise<void> => {
       err: IError,
       req: Request,
       res: Response,
-      next: NextFunction
+      next: NextFunction,
     ): Response => {
       return res.status(err.statusCode || 500).json({
         message: err.message,
         status: err.statusCode || 500,
         stack: err.stack,
       });
-    }
+    },
   );
   const httpServer = app.listen(process.env.SERVER_PORT, () => {
     console.log(`Server is running on port ${process.env.SERVER_PORT}`);

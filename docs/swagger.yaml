@@ -1,0 +1,1107 @@
+openapi: 3.0.3
+info:
+  title: SOCIAL_APP API
+  description: Full API documentation for the SOCIAL_APP backend
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: done
+        data:
+          type: object
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+    SignupRequest:
+      type: object
+      required: [firstName, lastName, email, password, confirmPassword, phone]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        confirmPassword:
+          type: string
+        phone:
+          type: string
+        gender:
+          type: string
+          description: one of the Gender enum
+        _2FA:
+          type: boolean
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    TwoFARequest:
+      type: object
+      required: [otp]
+      properties:
+        otp:
+          type: string
+    ConfirmEmailRequest:
+      type: object
+      required: [email, otp]
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    ResetPasswordRequest:
+      type: object
+      required: [email, otp, password]
+      properties:
+        email:
+          type: string
+          format: email
+        otp:
+          type: string
+        password:
+          type: string
+    UpdateEmailRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    ConfirmEmailChangeRequest:
+      type: object
+      required: [oldOtp, newOtp]
+      properties:
+        oldOtp:
+          type: string
+        newOtp:
+          type: string
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+    SendFriendRequestParams:
+      type: object
+      properties:
+        to:
+          type: string
+          description: 24-char user id
+    UpdateUserBasicInfoRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+    PreSignedUrlRequest:
+      type: object
+      properties:
+        ContentType:
+          type: string
+        Originalname:
+          type: string
+    DeleteCoverImagesRequest:
+      type: object
+      properties:
+        urls:
+          type: array
+          items:
+            type: string
+    CreatePostRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        allowComments:
+          type: boolean
+        availability:
+          type: string
+    LikeUnlikePostRequest:
+      type: object
+      required: [postId, action]
+      properties:
+        postId:
+          type: string
+        action:
+          type: string
+          enum: [like, unlike]
+    UpdatePostRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        availability:
+          type: string
+        allowComments:
+          type: boolean
+        removedAttachments:
+          type: array
+          items:
+            type: string
+        removedTags:
+          type: array
+          items:
+            type: string
+        newTags:
+          type: array
+          items:
+            type: string
+    CreateCommentRequest:
+      type: object
+      required: [content, postId]
+      properties:
+        content:
+          type: string
+        postId:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    UpdateCommentRequest:
+      type: object
+      required: [commentId, content]
+      properties:
+        commentId:
+          type: string
+        content:
+          type: string
+        newTags:
+          type: array
+          items:
+            type: string
+        removedTags:
+          type: array
+          items:
+            type: string
+    CreateGroupRequest:
+      type: object
+      required: [groupName, participants]
+      properties:
+        groupName:
+          type: string
+        participants:
+          type: array
+          items:
+            type: string
+    GetChatQuery:
+      type: object
+      properties:
+        userId:
+          type: string
+
+paths:
+  /auth/signup:
+    post:
+      tags: [Auth]
+      summary: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Validation/Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/refresh-token:
+    post:
+      tags: [Auth]
+      summary: Refresh access token using refresh token
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: New access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                  message:
+                    type: string
+                  data:
+                    $ref: "#/components/schemas/RefreshTokenResponse"
+
+  /auth/2fa:
+    post:
+      tags: [Auth]
+      summary: Verify 2FA OTP
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TwoFARequest"
+      responses:
+        "200":
+          description: 2FA verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/confirm-email:
+    patch:
+      tags: [Auth]
+      summary: Confirm user email with OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmEmailRequest"
+      responses:
+        "200":
+          description: Email confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/resend-email-otp:
+    patch:
+      tags: [Auth]
+      summary: Resend email confirmation OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: OTP resent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/forgot-password:
+    patch:
+      tags: [Auth]
+      summary: Send password reset OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        "200":
+          description: OTP sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/reset-password:
+    patch:
+      tags: [Auth]
+      summary: Reset password with OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "200":
+          description: Password reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/update-email:
+    patch:
+      tags: [Auth]
+      summary: Request email update (sends OTP)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmailRequest"
+      responses:
+        "200":
+          description: Update requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/confirm-email-change:
+    patch:
+      tags: [Auth]
+      summary: Confirm email change with old and new OTPs
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmEmailChangeRequest"
+      responses:
+        "200":
+          description: Email changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/send-friend-request/{to}:
+    post:
+      tags: [User]
+      summary: Send a friend request to a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: to
+          schema:
+            type: string
+          required: true
+          description: target user id (24 chars)
+      responses:
+        "200":
+          description: Friend request sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/accept-friend-request/{from}:
+    patch:
+      tags: [User]
+      summary: Accept a friend request
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: from
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Friend request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/delete-friend-request/{to}:
+    patch:
+      tags: [User]
+      summary: Delete a sent friend request
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: to
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Friend request deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/unfriend/{friendId}:
+    patch:
+      tags: [User]
+      summary: Unfriend a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: friendId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Unfriended
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/block-user/{userId}:
+    patch:
+      tags: [User]
+      summary: Block a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: User blocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/upload-profile-picture:
+    patch:
+      tags: [User]
+      summary: Upload profile picture
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profilePicture:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Profile picture uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/upload-cover-images:
+    patch:
+      tags: [User]
+      summary: Upload cover images (up to 5)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                coverImages:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "200":
+          description: Cover images uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/upload-file-with-presigned-url:
+    patch:
+      tags: [User]
+      summary: Request pre-signed S3 upload URL
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreSignedUrlRequest"
+      responses:
+        "200":
+          description: Pre-signed URL generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/pre-signed-url/uploads/{path}:
+    get:
+      tags: [User]
+      summary: Get pre-signed URL for a file path
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: downloadName
+          schema:
+            type: string
+        - in: query
+          name: download
+          schema:
+            type: string
+      responses:
+        "200":
+          description: URL returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/uploads/{path}:
+    get:
+      tags: [User]
+      summary: Download or stream asset from S3
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: downloadName
+          schema:
+            type: string
+      responses:
+        "200":
+          description: File streamed
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+  /user/uploads/delete-profile-image/{path}:
+    delete:
+      tags: [User]
+      summary: Delete profile image
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/uploads/delete-cover-images/{path}:
+    delete:
+      tags: [User]
+      summary: Delete cover images batch
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteCoverImagesRequest"
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/update-user-basic-info:
+    patch:
+      tags: [User]
+      summary: Update basic user info
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBasicInfoRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /user/profile:
+    get:
+      tags: [User]
+      summary: Get the authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /chat:
+    get:
+      tags: [Chat]
+      summary: Get chat for a user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Chats list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+    post:
+      tags: [Chat]
+      summary: Create a group chat
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupRequest"
+      responses:
+        "200":
+          description: Group created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /chat/group/{groupId}:
+    get:
+      tags: [Chat]
+      summary: Get messages for a group
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: groupId
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Group chat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /post:
+    post:
+      tags: [Post]
+      summary: Create a new post (supports up to 5 attachments)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                allowComments:
+                  type: boolean
+                availability:
+                  type: string
+                attachments:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+    get:
+      summary: Not used
+
+  /post/like-unlike:
+    patch:
+      tags: [Post]
+      summary: Like or unlike a post
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LikeUnlikePostRequest"
+      responses:
+        "200":
+          description: Liked/Unliked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /post/get-post-by-id/{postId}:
+    get:
+      tags: [Post]
+      summary: Get a post by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Post fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /post/freeze-post/{postId}:
+    patch:
+      tags: [Post]
+      summary: Freeze (soft-delete) a post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post frozen
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /post/activate-post/{postId}:
+    patch:
+      tags: [Post]
+      summary: Activate a frozen post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /post/update-post/{postId}:
+    patch:
+      tags: [Post]
+      summary: Update a post (can upload new attachments)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                availability:
+                  type: string
+                allowComments:
+                  type: boolean
+                removedAttachments:
+                  type: array
+                  items:
+                    type: string
+                removedTags:
+                  type: array
+                  items:
+                    type: string
+                newTags:
+                  type: array
+                  items:
+                    type: string
+                attachments:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "200":
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /post/delete-post/{postId}:
+    delete:
+      tags: [Post]
+      summary: Delete a post
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /comment:
+    post:
+      tags: [Comment]
+      summary: Create a comment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "200":
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /comment/get-comment/{commentId}:
+    get:
+      tags: [Comment]
+      summary: Get comment by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Comment fetched
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /comment/freeze-comment/{commentId}:
+    patch:
+      tags: [Comment]
+      summary: Freeze a comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Comment frozen
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /comment/activate-comment/{commentId}:
+    patch:
+      tags: [Comment]
+      summary: Activate a comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Comment activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /comment/update-comment/{commentId}:
+    patch:
+      tags: [Comment]
+      summary: Update a comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCommentRequest"
+      responses:
+        "200":
+          description: Comment updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /comment/delete-comment/{commentId}:
+    delete:
+      tags: [Comment]
+      summary: Delete a comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+tags:
+  - name: Auth
+    description: Authentication and account endpoints
+  - name: User
+    description: User profile and relationships
+  - name: Post
+    description: Post management
+  - name: Comment
+    description: Comment management
+  - name: Chat
+    description: Chat and group endpoints

@@ -17,7 +17,9 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.3.3",
-    "@types/nodemailer": "^7.0.1"
+    "@types/nodemailer": "^7.0.1",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.896.0",
@@ -37,6 +39,8 @@
     "nanoid": "^5.1.5",
     "nodemailer": "^7.0.6",
     "socket.io": "^4.8.1",
+    "swagger-ui-express": "^4.6.3",
+    "yamljs": "^0.3.0",
     "zod": "^4.1.8"
   }
 }

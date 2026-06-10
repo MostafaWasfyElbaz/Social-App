@@ -8,19 +8,30 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const routes_1 = __importDefault(require("./routes"));
+const swagger_1 = __importDefault(require("./swagger"));
 const DBConnection_1 = require("./DB/DBConnection");
 const cors_1 = __importDefault(require("cors"));
 const gateway_1 = require("./modules/gateway/gateway");
 const graphql_1 = require("graphql");
 const express_2 = require("graphql-http/lib/use/express");
+const helmet_1 = __importDefault(require("helmet"));
+const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 dotenv_1.default.config({
     path: path_1.default.resolve("./src/config/.env"),
 });
-const app = (0, express_1.default)();
+const limitter = (0, express_rate_limit_1.default)({
+    windowMs: 15 * 60 * 1000,
+    limit: 1000,
+    message: {
+        status: 429,
+        message: "Too many requests from this IP, please try again after 15 minutes",
+    },
+});
 const bootstrap = async () => {
-    app.use((0, cors_1.default)());
+    const app = (0, express_1.default)();
+    (0, swagger_1.default)(app);
+    app.use((0, cors_1.default)(), express_1.default.json(), (0, helmet_1.default)());
     await (0, DBConnection_1.DBConnection)();
-    app.use(express_1.default.json());
     app.use("/api/v1", routes_1.default);
     const schema = new graphql_1.GraphQLSchema({
         query: new graphql_1.GraphQLObjectType({
